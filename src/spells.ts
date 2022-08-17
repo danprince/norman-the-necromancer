@@ -1,8 +1,9 @@
 import * as sprites from "./sprites.json";
 import { GameObject, Spell } from "./game";
 import { damage } from "./actions";
-import { GreenTrail as greenTrail } from "./fx";
+import { GreenTrail, PuffOfSmoke } from "./fx";
 import { MOBILE, MISSILE } from "./tags";
+import { screenshake } from "./renderer";
 
 export function ScreechingSkull(x: number, y: number, angle: number, speed: number) {
   let object = new GameObject();
@@ -18,12 +19,18 @@ export function ScreechingSkull(x: number, y: number, angle: number, speed: numb
   object.friction = 0.5;
   object.ttl = 3000;
 
+  object.onBounce = () => {
+    let emitter = PuffOfSmoke(object.bounds());
+    emitter.burst(20);
+    emitter.stopThenRemove();
+  };
+
   object.onCollision = target => {
     game.despawn(object);
     damage(target, 1);
   };
 
-  object.emitter = greenTrail();
+  object.emitter = GreenTrail();
   object.emitter.start();
   return object;
 }
@@ -36,6 +43,7 @@ export class Skullduggery extends Spell {
   override reloadCooldown = 1000;
   override onCast(x: number, y: number) {
     game.spawn(ScreechingSkull(x, y, game.targetAngle, 160));
+    screenshake(50);
   }
 }
 
@@ -58,6 +66,11 @@ export function MiasmaCharge(x: number, y: number, angle: number, speed: number)
   object.emitter = emitter;
 
   object.onBounce = object.onCollision = () => {
+    let smoke = PuffOfSmoke(object.bounds());
+    smoke.burst(30);
+    smoke.stopThenRemove();
+    screenshake(300);
+
     let emitter = greenTrail();
     emitter.x = object.x;
     emitter.y = object.y;

@@ -2,6 +2,15 @@ import { beginView, clear, ctx, drawSceneSprite, drawSprite, endView, mouse, wri
 import { drawParticles } from "./particles";
 import * as Sprites from "./sprites.json";
 
+let shake = false;
+let shakeTimeout = 0;
+
+export function screenshake(duration: number = 100) {
+  shake = true;
+  clearTimeout(shakeTimeout);
+  shakeTimeout = setTimeout(() => shake = false, duration);
+}
+
 function drawBackground() {
   for (let i = 0; i < 400 / 16; i++) {
     drawSceneSprite(Sprites.wall, i * 16, 0);
@@ -26,6 +35,11 @@ function drawReticle() {
 export function render() {
   clear();
   beginView(0, 100);
+
+  if (shake) {
+    ctx.translate(Math.random() * 2 | 0, Math.random() * 2 | 0);
+  }
+
   drawBackground();
   drawParticles();
 

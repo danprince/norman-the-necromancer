@@ -1,6 +1,6 @@
 import { Rect, Sprite } from "./engine";
 import { Emitter } from "./particles";
-import * as Sprites from "./sprites.json";
+import * as sprites from "./sprites.json";
 
 export function GreenTrail() {
   return new Emitter({
@@ -12,9 +12,9 @@ export function GreenTrail() {
     gravity: -0.2,
     friction: 0.5,
     variants: [
-      [Sprites.p_green_1, Sprites.p_green_2, Sprites.p_green_3],
-      [Sprites.p_green_2, Sprites.p_green_3, Sprites.p_green_4],
-      [Sprites.p_green_1, Sprites.p_green_3, Sprites.p_green_5],
+      [sprites.p_green_1, sprites.p_green_2, sprites.p_green_3],
+      [sprites.p_green_2, sprites.p_green_3, sprites.p_green_4],
+      [sprites.p_green_1, sprites.p_green_3, sprites.p_green_5],
     ],
   });
 }
@@ -29,9 +29,9 @@ export function BonePop() {
     gravity: -100,
     friction: 0.5,
     variants: [
-      [Sprites.p_bone_1],
-      [Sprites.p_bone_2],
-      [Sprites.p_bone_3],
+      [sprites.p_bone_1],
+      [sprites.p_bone_2],
+      [sprites.p_bone_3],
     ],
   });
 }
@@ -56,12 +56,23 @@ export function Cloud(area: Rect, variants: Sprite[][]) {
 
 export function HolyBlessing(area: Rect) {
   return Cloud(area, [
-    [Sprites.p_star_1, Sprites.p_star_2, Sprites.p_star_3],
-    [Sprites.p_star_2, Sprites.p_star_3, Sprites.p_star_4],
-    [Sprites.p_star_1, Sprites.p_star_3],
+    [sprites.p_star_1, sprites.p_star_2, sprites.p_star_3],
+    [sprites.p_star_2, sprites.p_star_3, sprites.p_star_4],
+    [sprites.p_star_1, sprites.p_star_3],
   ]);
 }
 
 export function Healing(area: Rect) {
-  return Cloud(area, [[Sprites.health_pip]]);
+  return Cloud(area, [[sprites.health_pip]]);
+}
+
+export function PuffOfSmoke(area: Rect) {
+  let emitter = Cloud(area, [
+    [sprites.p_smoke_1, sprites.p_smoke_2, sprites.p_smoke_3],
+    [sprites.p_smoke_4, sprites.p_smoke_5, sprites.p_smoke_6],
+  ]);
+  emitter.options.angle = [0, Math.PI * 2];
+  emitter.options.speed = [0, 10];
+  emitter.options.gravity = 5;
+  return emitter;
 }
