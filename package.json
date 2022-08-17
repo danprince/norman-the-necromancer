@@ -1,0 +1,19 @@
+{
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "prebuild": "rm -rf dist dist.zip*",
+    "build": "tsc && vite build && yarn archive",
+    "build:full": "tsc && vite build && yarn squash && yarn archive",
+    "squash": "tinypng dist/",
+    "archive": "zip dist.zip -r dist/* && ./scripts/measure.sh dist.zip",
+    "typecheck": "tsc",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "terser": "^5.14.2",
+    "tinypng-cli": "^0.0.7",
+    "typescript": "^4.5.4",
+    "vite": "^2.9.9"
+  }
+}
