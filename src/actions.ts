@@ -2,6 +2,7 @@ import { BonePop } from "./fx";
 import { GameObject } from "./game";
 import { Corpse } from "./units";
 import * as Sprites from "./sprites.json";
+import { LIVING } from "./tags";
 
 export function damage(unit: GameObject, amount: number) {
   unit.hp = Math.min(Math.max(unit.hp - amount, 0), unit.maxHp);
@@ -12,20 +13,23 @@ export function damage(unit: GameObject, amount: number) {
 }
 
 export function death(unit: GameObject) {
-  game.souls += 1;
-  game.despawn(unit);
-  let corpse = Corpse(unit.x, 10);
+  if (unit.tags & LIVING) {
+    game.souls += 1;
+    let corpse = Corpse(unit.x, 10);
 
-  if (Math.random() > 0.5) {
-    game.spawn(corpse);
+    if (Math.random() > 0.5) {
+      game.spawn(corpse);
+    }
+
+    let emitter = BonePop();
+    emitter.x = unit.x;
+    emitter.y = unit.y;
+    emitter.start();
+    emitter.burst(2 + Math.random() * 5 | 0);
+    corpse.emitter = emitter;
   }
 
-  let emitter = BonePop();
-  emitter.x = unit.x;
-  emitter.y = unit.y;
-  emitter.start();
-  emitter.burst(2 + Math.random() * 5 | 0);
-  corpse.emitter = emitter;
+  game.despawn(unit);
 }
 
 let castTimeout = 0;
