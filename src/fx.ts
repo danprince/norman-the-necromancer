@@ -71,8 +71,8 @@ export function PuffOfSmoke(area: Rect) {
     [sprites.p_smoke_1, sprites.p_smoke_2, sprites.p_smoke_3],
     [sprites.p_smoke_4, sprites.p_smoke_5, sprites.p_smoke_6],
   ]);
-  emitter.options.angle = [0, Math.PI * 2];
+  emitter.options.angle = [0.5, -0.5];
   emitter.options.speed = [0, 10];
-  emitter.options.gravity = 5;
+  emitter.options.gravity = 0;
   return emitter;
 }

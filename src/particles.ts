@@ -88,19 +88,13 @@ export class Emitter {
       } else {
         p.x += p.vx * t;
         p.y += p.vy * t;
-
-        if (p.y > 0) {
-          p.vy += this.options.gravity * t;
-        }
+        p.vy += this.options.gravity * t;
 
         if (p.y <= 0) {
           p.y = 0;
           p.vy *= -p.bounce;
           p.vx *= this.options.friction;
         }
-
-        if (Math.abs(p.vx) < 1) p.vx = 0;
-        if (Math.abs(p.vy) < 1) p.vy = 0;
       }
     }
 

@@ -221,12 +221,14 @@ export class Game {
           object.y + object.sprite[3] >= CEILING_LEVEL)
       ) {
         object.y = Math.min(CEILING_LEVEL, Math.max(FLOOR_LEVEL, object.y));
-        object.vy *= -object.bounce;
-        object.vx *= object.friction;
+
         // We don't care about tiny bounces
         if (Math.abs(object.vy) >= 10) {
           object.onBounce();
         }
+
+        object.vy *= -object.bounce;
+        object.vx *= object.friction;
       }
 
       if (object.gravity && object.y > 0) {

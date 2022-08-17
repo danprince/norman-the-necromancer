@@ -60,18 +60,15 @@ export function MiasmaCharge(x: number, y: number, angle: number, speed: number)
   object.bounce = 0;
   object.friction = 0.9;
 
-  let emitter = greenTrail();
+  let emitter = GreenTrail();
   emitter.options.frequency = 0.1;
   emitter.start();
   object.emitter = emitter;
 
   object.onBounce = object.onCollision = () => {
-    let smoke = PuffOfSmoke(object.bounds());
-    smoke.burst(30);
-    smoke.stopThenRemove();
     screenshake(300);
 
-    let emitter = greenTrail();
+    let emitter = GreenTrail();
     emitter.x = object.x;
     emitter.y = object.y;
     emitter.options.angle = [0, Math.PI * 2];

@@ -3,10 +3,11 @@ import { cast, damage, useAbility } from "./actions";
 import { Game, GameObject, Wave } from "./game";
 import { render } from "./renderer";
 import { Archer, Paladin, Priest, Villager } from "./units";
-import { Skullduggery } from "./spells";
+import { Miasma, Skullduggery } from "./spells";
 import * as sprites from "./sprites.json";
 import { MOBILE, PLAYER } from "./tags";
 import { Resurrect } from "./abilities";
+import { randomElement } from "./helpers";
 
 declare global {
   const game: Game;
@@ -43,7 +44,7 @@ player.onCollision = unit => {
 
 (window as any).game = new Game(
   player,
-  new Skullduggery(),
+  randomElement([new Skullduggery(), new Miasma()]),
   new Resurrect(),
   wave
 );
