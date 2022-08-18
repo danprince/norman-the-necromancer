@@ -20,8 +20,7 @@ function drawBackground() {
 }
 
 function drawReticle() {
-  let { spell, player } = game;
-  if (!spell) return;
+  let { player, holding } = game;
   let [mouseX, mouseY] = mouse();
   let playerX = player.x + player.sprite[2] / 2;
   let playerY = player.y + player.sprite[3] / 2;
@@ -29,12 +28,13 @@ function drawReticle() {
   let reticleX = playerX + Math.sin(angle) * game.targetRadius;
   let reticleY = playerY + Math.cos(angle) * game.targetRadius;
   game.targetAngle = angle;
+  if (holding) drawSceneSprite(holding.sprite, player.x, player.y);
   drawSceneSprite(Sprites.reticle, reticleX - Sprites.reticle[2] / 2, reticleY - Sprites.reticle[3] / 2);
 }
 
 export function render() {
   clear();
-  beginView(0, 100);
+  beginView(0, 150);
 
   if (shake) {
     ctx.translate(Math.random() * 2 | 0, Math.random() * 2 | 0);
@@ -42,6 +42,8 @@ export function render() {
 
   drawBackground();
   drawParticles();
+
+  drawSceneSprite(Sprites.casting_glyphs, 0, 0);
 
   for (let object of game.objects) {
     drawSceneSprite(object.sprite, object.x, object.y);

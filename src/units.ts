@@ -68,6 +68,15 @@ export function Paladin() {
   return unit;
 }
 
+export function TheKing() {
+  let unit = Villager();
+  unit.sprite = sprites.the_king;
+  unit.speed = 5000;
+  unit.hp = 200;
+  unit.maxHp = 200;
+  return unit;
+}
+
 export function Archer() {
   let unit = Villager();
   unit.sprite = sprites.archer;

@@ -43,7 +43,6 @@ export class Skullduggery extends Spell {
   override reloadCooldown = 1000;
   override onCast(x: number, y: number) {
     game.spawn(ScreechingSkull(x, y, game.targetAngle, 160));
-    screenshake(50);
   }
 }
 

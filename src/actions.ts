@@ -35,14 +35,25 @@ export function death(unit: GameObject) {
 let castTimeout = 0;
 
 export function cast() {
-  let spell = game.spell;
-  if (spell.casts <= 0) return;
   let playerX = game.player.x + game.player.sprite[2] / 2;
   let playerY = game.player.y + game.player.sprite[3] / 2;
   let x = playerX + Math.sin(game.targetAngle) * game.targetRadius;
   let y = playerY + Math.cos(game.targetAngle) * game.targetRadius;
 
-  spell.cast(x, y);
+  if (game.holding) {
+    let object = game.holding;
+    object.x = x;
+    object.y = y;
+    object.vx = Math.sin(game.targetAngle) * 150;
+    object.vy = Math.cos(game.targetAngle) * 150;
+    game.spawn(object);
+    game.holding = undefined;
+  } else {
+    let spell = game.spell;
+    if (spell.casts <= 0) return;
+    spell.cast(x, y);
+  }
+
   clearTimeout(castTimeout);
   game.player.sprite = Sprites.norman_arms_up;
   castTimeout = setTimeout(() => game.player.sprite = Sprites.norman_arms_down, 500);

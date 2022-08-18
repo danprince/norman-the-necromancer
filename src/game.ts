@@ -1,9 +1,6 @@
 import { Rect, Sprite, updateTweens } from "./engine";
 import { Emitter, updateParticles } from "./particles";
 
-const FLOOR_LEVEL = 0;
-const CEILING_LEVEL = 200;
-
 export class GameObject {
   x = 0;
   y = 0;
@@ -178,6 +175,8 @@ export abstract class Spell {
 export class Game {
   stageWidth = 400;
   stageHeight = 200;
+  floorLevel = 0;
+  ceilingLevel = 200;
 
   objects: GameObject[] = [];
   player: GameObject;
@@ -187,6 +186,7 @@ export class Game {
 
   souls: number = 0;
 
+  holding: GameObject | undefined;
   targetAngle: number = 0;
   targetRadius: number = 15;
   targetPower: number = 0;
@@ -217,10 +217,10 @@ export class Game {
       object.y += object.vy * t;
 
       if (
-        (object.y <= FLOOR_LEVEL ||
-          object.y + object.sprite[3] >= CEILING_LEVEL)
+        (object.y <= this.floorLevel ||
+          object.y + object.sprite[3] >= this.ceilingLevel)
       ) {
-        object.y = Math.min(CEILING_LEVEL, Math.max(FLOOR_LEVEL, object.y));
+        object.y = Math.min(this.ceilingLevel, Math.max(this.floorLevel, object.y));
 
         // We don't care about tiny bounces
         if (Math.abs(object.vy) >= 10) {

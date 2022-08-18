@@ -91,3 +91,5 @@ Turned "march" into a behaviour which feels good. Now skeletons/villagers share 
 - Villagers should start to drop stuff already
 
 ### Day 5
+- Figure out the wave structures
+- Award different soul amounts for different enemies

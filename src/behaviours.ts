@@ -14,10 +14,13 @@ export class March extends Behaviour {
   }
 
   onUse() {
+    // Don't try to march if the unit is airborne
+    if (this.owner.y > 0) return;
+
     tween(this.owner, {
       x: this.owner.x + this.direction,
     }, 200, t => {
-      this.owner.y = Math.sin(t * Math.PI) * 2;
+      this.owner.y = Math.sin(t * Math.PI) * 2 | 0;
     });
 
     // Ensure objects that move off stage are despawned

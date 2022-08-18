@@ -8,6 +8,7 @@ import * as sprites from "./sprites.json";
 import { MOBILE, PLAYER } from "./tags";
 import { Resurrect } from "./abilities";
 import { randomElement } from "./helpers";
+import { InstantDeath } from "./consumables";
 
 declare global {
   const game: Game;
@@ -44,14 +45,15 @@ player.onCollision = unit => {
 
 (window as any).game = new Game(
   player,
-  randomElement([new Skullduggery(), new Miasma()]),
+  //randomElement([new Skullduggery(), new Miasma()]),
+  new Skullduggery(),
   new Resurrect(),
   wave
 );
 
-let down = false;
-onpointerdown = () => down = true;
-onpointerup = () => down = false;
+game.holding = InstantDeath();
+
+onclick = () => cast();
 
 onkeydown = ({ key }) => {
   if (key === " ") {
@@ -60,7 +62,6 @@ onkeydown = ({ key }) => {
 }
 
 init(game.stageWidth, game.stageHeight, dt => {
-  if (down) cast();
   game.update(dt);
   render();
 });
