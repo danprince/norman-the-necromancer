@@ -1,14 +1,14 @@
+import * as sprites from "./sprites.json";
 import { init } from "./engine";
 import { cast, damage, useAbility } from "./actions";
 import { Game, GameObject, Wave } from "./game";
 import { render } from "./renderer";
 import { Archer, Paladin, Priest, Villager } from "./units";
-import { Miasma, Skullduggery } from "./spells";
-import * as sprites from "./sprites.json";
+import { Skullduggery } from "./spells";
 import { MOBILE, PLAYER } from "./tags";
 import { Resurrect } from "./abilities";
-import { randomElement } from "./helpers";
 import { InstantDeath } from "./consumables";
+import { Bouncing, Explosive, BounceAndSplit } from "./rituals";
 
 declare global {
   const game: Game;
@@ -45,13 +45,15 @@ player.onCollision = unit => {
 
 (window as any).game = new Game(
   player,
-  //randomElement([new Skullduggery(), new Miasma()]),
   new Skullduggery(),
   new Resurrect(),
   wave
 );
 
 game.holding = InstantDeath();
+game.addRitual(Bouncing);
+game.addRitual(Explosive);
+game.addRitual(BounceAndSplit);
 
 onclick = () => cast();
 

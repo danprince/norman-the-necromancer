@@ -2,7 +2,10 @@ import { Rect, Sprite } from "./engine";
 import { Emitter } from "./particles";
 import * as sprites from "./sprites.json";
 
-export function GreenTrail() {
+export const COLOR_GREEN = 0;
+export const COLOR_BLUE = 1;
+
+export function ColoredTrail(color = COLOR_GREEN) {
   return new Emitter({
     life: [500, 1000],
     speed: [1, 10],
@@ -11,10 +14,14 @@ export function GreenTrail() {
     frequency: 2,
     gravity: -0.2,
     friction: 0.5,
-    variants: [
+    variants: color === COLOR_GREEN ? [
       [sprites.p_green_1, sprites.p_green_2, sprites.p_green_3],
       [sprites.p_green_2, sprites.p_green_3, sprites.p_green_4],
       [sprites.p_green_1, sprites.p_green_3, sprites.p_green_5],
+    ] : [
+      [sprites.p_blue_1, sprites.p_blue_2, sprites.p_blue_3],
+      [sprites.p_blue_2, sprites.p_blue_3, sprites.p_blue_4],
+      [sprites.p_blue_1, sprites.p_blue_3, sprites.p_blue_5],
     ],
   });
 }

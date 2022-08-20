@@ -2,7 +2,7 @@ import * as sprites from "./sprites.json";
 import { GameObject } from "./game";
 import { randomElement } from "./helpers";
 import { damage } from "./actions";
-import { GreenTrail } from "./fx";
+import { ColoredTrail } from "./fx";
 import { Heal, March } from "./behaviours";
 import { CORPSE, LIVING, MOBILE, UNDEAD } from "./tags";
 
@@ -35,7 +35,7 @@ export function Skeleton(x: number, y: number) {
 
   unit.addBehaviour(new March(16));
 
-  let emitter = GreenTrail();
+  let emitter = ColoredTrail();
   emitter.x = unit.x;
   emitter.y = unit.y;
   emitter.options.angle = [0, 0];

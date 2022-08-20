@@ -1,7 +1,7 @@
 import * as sprites from "./sprites.json";
 import { GameObject, Spell } from "./game";
 import { damage } from "./actions";
-import { GreenTrail, PuffOfSmoke } from "./fx";
+import { ColoredTrail, COLOR_BLUE, PuffOfSmoke } from "./fx";
 import { MOBILE, MISSILE } from "./tags";
 import { screenshake } from "./renderer";
 
@@ -15,7 +15,6 @@ export function ScreechingSkull(x: number, y: number, angle: number, speed: numb
   object.tags = MISSILE;
   object.collisionTags = MOBILE;
   object.gravity = 100;
-  object.bounce = 0.5;
   object.friction = 0.5;
   object.ttl = 3000;
 
@@ -30,7 +29,7 @@ export function ScreechingSkull(x: number, y: number, angle: number, speed: numb
     damage(target, 1);
   };
 
-  object.emitter = GreenTrail();
+  object.emitter = ColoredTrail();
   object.emitter.start();
   return object;
 }
@@ -41,8 +40,8 @@ export class Skullduggery extends Spell {
   override maxCasts = 5;
   override casts = 5;
   override reloadCooldown = 1000;
-  override onCast(x: number, y: number) {
-    game.spawn(ScreechingSkull(x, y, game.targetAngle, 160));
+  override cast(x: number, y: number, angle: number): GameObject {
+    return ScreechingSkull(x, y, angle, 160);
   }
 }
 
@@ -59,7 +58,7 @@ export function MiasmaCharge(x: number, y: number, angle: number, speed: number)
   object.bounce = 0;
   object.friction = 0.9;
 
-  let emitter = GreenTrail();
+  let emitter = ColoredTrail(COLOR_BLUE);
   emitter.options.frequency = 0.1;
   emitter.start();
   object.emitter = emitter;
@@ -67,7 +66,7 @@ export function MiasmaCharge(x: number, y: number, angle: number, speed: number)
   object.onBounce = object.onCollision = () => {
     screenshake(300);
 
-    let emitter = GreenTrail();
+    let emitter = ColoredTrail(COLOR_BLUE);
     emitter.x = object.x;
     emitter.y = object.y;
     emitter.options.angle = [0, Math.PI * 2];
@@ -89,15 +88,4 @@ export function MiasmaCharge(x: number, y: number, angle: number, speed: number)
   };
 
   return object;
-}
-
-export class Miasma extends Spell {
-  name = "Miasma";
-  sprite = sprites.spell_skullduggery;
-  override maxCasts = 1;
-  override casts = 1;
-  override reloadCooldown = 2000;
-  override onCast(x: number, y: number) {
-    game.spawn(MiasmaCharge(x, y, game.targetAngle, 180));
-  }
 }

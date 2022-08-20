@@ -1,5 +1,6 @@
 import { Rect, Sprite, updateTweens } from "./engine";
 import { Emitter, updateParticles } from "./particles";
+import { emit, BounceEvent, CollisionEvent, DespawnEvent, SpawnEvent, UseAbilityEvent, CastSpellEvent } from "./events";
 
 export class GameObject {
   x = 0;
@@ -27,6 +28,17 @@ export class GameObject {
       w: this.sprite[2],
       h: this.sprite[3],
     };
+  }
+
+  clone() {
+    let clone = new GameObject();
+    Object.assign(clone, this);
+    clone.behaviours = [];
+    if (clone.emitter) {
+      clone.emitter = new Emitter(clone.emitter.options);
+      clone.emitter.start();
+    }
+    return clone;
   }
 
   onCollision(object: GameObject) {}
@@ -72,6 +84,12 @@ export class GameObject {
   }
 }
 
+export interface Ritual {
+  name: string;
+  sprite: Sprite;
+  activate(): void;
+}
+
 export class Wave {
   spawnCounter = 0;
   spawnTimer = 0;
@@ -105,6 +123,7 @@ export abstract class Ability {
     if (this.timer >= this.cooldown) {
       this.timer = 0;
       this.onUse();
+      emit(UseAbilityEvent);
     }
   }
 
@@ -135,21 +154,34 @@ export abstract class Behaviour {
 export abstract class Spell {
   abstract name: string;
   abstract sprite: Sprite;
+
   casts: number = 1;
   maxCasts: number = 1;
   reloadCooldown: number = 500;
   reloadTimer: number = 0;
-  rateOfFire: number = 200;
-  fireTimer: number = 0;
+  roundsPerCast: number = 1;
+  roundDelay: number = 200;
+  shotsPerRound: number = 1;
+  shotOffsetAngle: number = 0.2;
 
-  abstract onCast(x: number, y: number): void;
+  abstract cast(x: number, y: number, angle: number): GameObject;
 
-  cast(x: number, y: number) {
-    if (this.fireTimer > 0) return;
+  tryCast(x: number, y: number) {
+    if (this.casts === 0) return;
     this.casts -= 1;
     this.reloadTimer = this.reloadCooldown;
-    this.fireTimer = this.rateOfFire;
-    this.onCast(x, y);
+
+    let angle = game.targetAngle - (this.shotsPerRound * this.shotOffsetAngle) / 2;
+
+    for (let i = 0; i < this.roundsPerCast; i++) {
+      setTimeout(() => {
+        for (let j = 0; j < this.shotsPerRound; j++) {
+          let projectile = this.cast(x, y, angle + j * this.shotOffsetAngle);
+          emit(CastSpellEvent, projectile);
+          game.spawn(projectile);
+        }
+      }, i * this.roundDelay);
+    }
   }
 
   canCast() {
@@ -157,10 +189,6 @@ export abstract class Spell {
   }
 
   update(dt: number) {
-    if (this.fireTimer > 0) {
-      this.fireTimer -= dt;
-    }
-
     if (this.casts < this.maxCasts) {
       this.reloadTimer -= dt;
     }
@@ -183,6 +211,7 @@ export class Game {
   wave: Wave;
   spell: Spell;
   ability: Ability;
+  rituals: Ritual[] = [];
 
   souls: number = 0;
 
@@ -197,6 +226,11 @@ export class Game {
     this.spell = spell;
     this.ability = ability;
     this.spawn(player);
+  }
+
+  addRitual(ritual: Ritual) {
+    this.rituals.push(ritual);
+    ritual.activate();
   }
 
   update(dt: number) {
@@ -225,6 +259,7 @@ export class Game {
         // We don't care about tiny bounces
         if (Math.abs(object.vy) >= 10) {
           object.onBounce();
+          emit(BounceEvent, object);
         }
 
         object.vy *= -object.bounce;
@@ -262,6 +297,7 @@ export class Game {
           if (object.collisionTags & other.tags) {
             if (object.intersects(other)) {
               object.onCollision?.(other);
+              emit(CollisionEvent, object, other);
             }
           }
         }
@@ -271,10 +307,12 @@ export class Game {
 
   spawn(object: GameObject) {
     this.objects.push(object);
+    emit(SpawnEvent, object);
   }
 
   despawn(object: GameObject) {
     object.emitter?.stopThenRemove();
     this.objects.splice(this.objects.indexOf(object), 1);
+    emit(DespawnEvent, object);
   }
 }
