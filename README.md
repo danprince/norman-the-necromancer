@@ -93,3 +93,13 @@ Turned "march" into a behaviour which feels good. Now skeletons/villagers share 
 ### Day 5
 - Figure out the wave structures
 - Award different soul amounts for different enemies
+
+### Day 6
+Nothing.
+
+### Day 7
+Reworking the engine to focus on single spell/ability depth.
+- [ ] Need to figure out how to get mouse input relative to the scene.
+
+### Day 8
+- [ ] Should behaviour be an interface `unit.addBehaviour({ onCollision: ... })`

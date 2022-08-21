@@ -11,7 +11,7 @@ import { InstantDeath } from "./consumables";
 import { Bouncing, Explosive, BounceAndSplit } from "./rituals";
 
 declare global {
-  const game: Game;
+  //const game: Game;
 }
 
 let wave = new Wave();

@@ -2,7 +2,7 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "prebuild": "rm -rf dist dist.zip*",
+    "prebuild": "rm -rf dist dist.zip",
     "build": "tsc && vite build && yarn archive",
     "build:full": "tsc && vite build && yarn squash && yarn archive",
     "squash": "tinypng dist/",

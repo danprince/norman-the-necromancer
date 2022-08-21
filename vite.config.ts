@@ -7,9 +7,6 @@ export default defineConfig({
     assetsInlineLimit: 0,
     minify: "terser",
     terserOptions: {
-      compress: {
-        unsafe: true,
-      },
       mangle: {
         properties: true,
       },
