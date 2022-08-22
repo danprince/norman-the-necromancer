@@ -2,9 +2,10 @@ import * as sprites from "./sprites.json";
 import * as fx from "./fx";
 import { Behaviour, GameObject } from "./game";
 import { CORPSE, LIVING, MISSILE, MOBILE, PLAYER, UNDEAD } from "./tags";
-import { DEG_360, randomOneOf } from "./helpers";
+import { randomOneOf } from "./helpers";
 import { March, Attack, DespawnTimer, VelocityTrail } from "./behaviours";
 import { Damage } from "./actions";
+import { tween } from "./engine";
 
 export function Corpse(x: number, y: number) {
   let unit = new GameObject();
@@ -43,7 +44,6 @@ export function Projectile() {
   object.bounce = 0.5;
   object.friction = 0.5;
   object.addBehaviour(new DespawnTimer(object, 3000));
-  object.addBehaviour(new VelocityTrail(object));
 
   object.onCollision = target => {
     Damage(target, 1);
@@ -115,7 +115,7 @@ export function ShellKnight() {
   };
 
   shell.onDamage = dmg => {
-    if (shelled) {
+    if (shelled && dmg.amount > 0) {
       dmg.amount = 0;
     }
   };
@@ -124,3 +124,38 @@ export function ShellKnight() {
 
   return unit;
 }
+
+export function Monk() {
+  let unit = Villager();
+  unit.sprite = sprites.monk;
+  unit.updateSpeed = 600;
+  unit.hp = unit.maxHp = 3;
+
+  let heal = new Behaviour(unit);
+  heal.turns = 5;
+  heal.onUpdate = () => {
+    for (let object of game.objects) {
+      if (object.tags & LIVING) {
+        Damage(object, -1);
+      }
+    }
+
+    fx.cloud(unit.bounds(), [
+      [sprites.p_star_1, sprites.p_star_2, sprites.p_star_3],
+      [sprites.p_star_2, sprites.p_star_3, sprites.p_star_4],
+      [sprites.p_star_1, sprites.p_star_3],
+    ]).burst(10).remove();
+  };
+
+  unit.addBehaviour(heal);
+  return unit;
+}
+
+export function Archer() {
+  let unit = Villager();
+  unit.sprite = sprites.archer;
+  unit.updateSpeed = 300;
+  unit.hp = unit.maxHp = 2;
+  return unit;
+}
+

@@ -1,5 +1,4 @@
 export const DEG_180 = Math.PI;
-export const DEG_360 = DEG_180 * 2;
 export const DEG_90 = DEG_180 / 2;
 export const DEG_270 = DEG_180 + DEG_90;
 

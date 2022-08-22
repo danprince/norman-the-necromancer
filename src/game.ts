@@ -58,8 +58,12 @@ export class GameObject {
     }
   }
 
-  addBehaviour(behaviour: Partial<Behaviour>) {
-    this.behaviours.push(behaviour as Behaviour);
+  addBehaviour(behaviour: Behaviour) {
+    this.behaviours.push(behaviour);
+  }
+
+  removeBehaviour(behaviour: Behaviour) {
+    removeFromArray(this.behaviours, behaviour);
   }
 
   onFrame(dt: number) {
@@ -70,7 +74,11 @@ export class GameObject {
 
   onUpdate() {
     for (let behaviour of this.behaviours) {
-      behaviour.onUpdate();
+      if (++behaviour.timer >= behaviour.turns) {
+        behaviour.timer = 0;
+        let skip = behaviour.onUpdate();
+        if (skip) break;
+      }
     }
   }
 
@@ -95,7 +103,9 @@ export class GameObject {
 
 export class Behaviour {
   constructor(public object: GameObject) {}
-  onUpdate() {}
+  turns = 1;
+  timer = 0;
+  onUpdate(): boolean | void {}
   onBounce() {}
   onDamage(damage: Damage) {}
   onDeath() {}
@@ -199,6 +209,9 @@ export class Game {
         }
 
         object.vy *= -object.bounce;
+      }
+
+      if (object.y === 0) {
         object.vx *= object.friction;
       }
 

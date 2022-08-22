@@ -22,8 +22,7 @@ export class DespawnTimer extends Behaviour {
   }
 
   onFrame(dt: number): void {
-    this.elapsed += dt;
-    if (this.elapsed >= this.duration) {
+    if ((this.elapsed += dt) >= this.duration) {
       game.despawn(this.object);
     }
   }
