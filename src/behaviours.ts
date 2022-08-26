@@ -4,43 +4,15 @@ import { Damage } from "./actions";
 import { tween } from "./engine";
 import { Behaviour, GameObject } from "./game";
 import { screenshake } from "./renderer";
-
-export class Hex extends Behaviour {
-  private hexSpeed = 3000;
-  private hexTimer = 0;
-
-  constructor(object: GameObject) {
-    super(object);
-    object.emitter = fx.cloud({ x: 0, y: 0, w: 0, h: 0 }, [
-      [sprites.p_purple_1, sprites.p_purple_2, sprites.p_purple_3],
-      [sprites.p_purple_2, sprites.p_purple_3],
-    ]).extend({ frequency: 0.05 }).start();
-  }
-
-  onFrame(dt: number): void {
-    if ((this.hexTimer += dt) < this.hexSpeed) return;
-
-    this.hexTimer = 0;
-    Object.assign(this.object.emitter!, this.object.bounds());
-    this.object.emitter!.burst(20);
-
-    // Hex can't kill
-    if (this.object.hp > 1) {
-      Damage(this.object, 1);
-    }
-  }
-}
+import type { Damage as Dmg } from "./game";
+import { distance, vectorToAngle, angleBetweenPoints, vectorFromAngle } from "./helpers";
 
 export class Attack extends Behaviour {
-  constructor(object: GameObject) {
-    super(object);
-  }
-
   onCollision(target: GameObject): void {
     let dealDamage = this.object.hp;
     let takeDamage = target.hp;
-    Damage(target, dealDamage);
-    Damage(this.object, takeDamage);
+    Damage(target, dealDamage, this.object);
+    Damage(this.object, takeDamage, target);
   }
 }
 
@@ -55,11 +27,6 @@ export class DespawnTimer extends Behaviour {
     if ((this.elapsed += dt) >= this.duration) {
       game.despawn(this.object);
     }
-  }
-
-  onCollision(target: GameObject): void {
-    Damage(target, this.object.hp);
-    Damage(this.object, this.object.hp);
   }
 }
 
@@ -92,6 +59,64 @@ export class March extends Behaviour {
 export class Damaging extends Behaviour {
   amount = 1;
   onCollision(target: GameObject): void {
-    Damage(target, this.amount);
+    Damage(target, this.amount, this.object);
+  }
+}
+
+export class Bleeding extends Behaviour {
+  override turns = 3;
+
+  onUpdate(): boolean | void {
+    this.object.emitter?.burst(1);
+    Damage(this.object, 1, this.object);
+  }
+}
+
+export class Enraged extends Behaviour {
+  constructor(object: GameObject) {
+    super(object);
+    object.emitter = fx.cloud({ x: 0, y: 0, w: 0, h: 0 }, [
+      [sprites.health_orb, sprites.health_pip],
+      [sprites.health_pip]
+    ]).extend({
+      mass: [10, 30],
+      velocity: [10, 30],
+    });
+  }
+
+  onDamage(damage: Dmg): void {
+    // Ignore self-inflicted damage
+    if (damage.dealer == this.object) return;
+    Damage(this.object, -damage.amount, this.object);
+    damage.amount = 0;
+    this.object.emitter?.extend(this.object.bounds()).burst(4);
+  }
+}
+
+export class Seeking extends Behaviour {
+  onFrame(): void {
+    let projectile = this.object;
+    let target: GameObject | undefined;
+    let minDist = 100;
+
+    for (let object of game.objects) {
+      if (object.tags & this.object.collisionMask) {
+        let dist = distance(projectile, object);
+        if (dist < minDist) {
+          target = object;
+          minDist = dist;
+        }
+      }
+    }
+
+    if (target) {
+      let currentAngle = vectorToAngle(projectile.vx, projectile.vy);
+      let desiredAngle = angleBetweenPoints(projectile, target);
+      let angle = currentAngle + (desiredAngle - currentAngle) / 4;
+      let magnitude = Math.hypot(projectile.vx, projectile.vy);
+      let [vx, vy] = vectorFromAngle(angle);
+      projectile.vx = vx * magnitude;
+      projectile.vy = vy * magnitude;
+    }
   }
 }

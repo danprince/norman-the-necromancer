@@ -139,6 +139,7 @@ export class Behaviour {
 
 export interface Damage {
   amount: number;
+  dealer: GameObject | undefined;
 }
 
 interface Stage {
@@ -151,13 +152,14 @@ interface Stage {
 export interface Spell {
   targetAngle: number;
   targetRadius: number;
-  targetPower: number;
+  basePower: number;
   shotsPerRound: number;
   shotOffsetAngle: number;
   maxCasts: number;
   currentCasts: number;
   castRechargeRate: number;
   castRechargeTimer: number;
+  castStartTime: number;
 }
 
 export interface Ability {
@@ -187,13 +189,14 @@ export class Game {
   spell: Spell = {
     targetAngle: 0,
     targetRadius: 15,
-    targetPower: 160,
+    basePower: 160,
     shotsPerRound: 1,
     shotOffsetAngle: 0.1,
     maxCasts: 3,
     currentCasts: 3,
     castRechargeRate: 1000,
     castRechargeTimer: 0,
+    castStartTime: Infinity,
   };
 
   ability: Ability = {
@@ -252,6 +255,8 @@ export class Game {
   }
 
   private updateSpell(dt: number) {
+    game.ability.timer += dt;
+
     if (this.spell.currentCasts < this.spell.maxCasts) {
       this.spell.castRechargeTimer += dt;
       if (this.spell.castRechargeTimer > this.spell.castRechargeRate) {
@@ -328,5 +333,10 @@ export class Game {
       x: center.x + vx * spell.targetRadius,
       y: center.y + vy * spell.targetRadius,
     };
+  }
+
+  getCastingEnergy(): number {
+    let delta = Date.now() - this.spell.castStartTime;
+    return Math.min(delta / 1000, 1);
   }
 }

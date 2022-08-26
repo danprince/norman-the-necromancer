@@ -1,12 +1,16 @@
 import * as sprites from "./sprites.json";
 import * as fx from "./fx";
 import { Damage, GameObject } from "./game";
-import { clamp, vectorFromAngle } from "./helpers";
+import { clamp, randomFloat, randomInt, vectorFromAngle } from "./helpers";
 import { Chariot, Corpse, Projectile, Skeleton, SkeletonLord } from "./objects";
 import { CORPSE, LIVING, MOBILE } from "./tags";
 
-export function Damage(object: GameObject, amount: number) {
-  let damage: Damage = { amount };
+export function Damage(
+  object: GameObject,
+  amount: number,
+  dealer?: GameObject,
+) {
+  let damage: Damage = { amount, dealer };
   object.onDamage(damage);
   object.hp = clamp(object.hp - damage.amount, 0, object.maxHp);
   if (!object.hp) Die(object);
@@ -20,10 +24,10 @@ export function Die(object: GameObject) {
     fx
       .bones()
       .extend(center)
-      .burst(2 + Math.random() * 3)
+      .burst(2 + randomInt(3))
       .remove();
 
-    if (object.tags & LIVING && Math.random() > 0.75) {
+    if (object.tags & LIVING && randomFloat() > 0.75) {
       game.spawn(Corpse(center.x, center.y));
     }
 
@@ -37,8 +41,11 @@ let castAnimationTimeout = 0;
 
 export function Cast() {
   let { spell, player } = game;
+
   if (spell.currentCasts === 0) return;
   spell.currentCasts -= 1;
+
+  let power = spell.basePower + game.getCastingEnergy() * 100;
 
   player.sprite = sprites.norman_arms_up;
   clearTimeout(castAnimationTimeout);
@@ -53,17 +60,25 @@ export function Cast() {
     projectile.sprite = sprites.p_green_skull;
     projectile.x = x - projectile.sprite[2] / 2;
     projectile.y = y - projectile.sprite[3] / 2;
-    projectile.vx = vx * spell.targetPower;
-    projectile.vy = vy * spell.targetPower;
+    projectile.vx = vx * power;
+    projectile.vy = vy * power;
     game.spawn(projectile);
 
     for (let ritual of game.rituals) {
       ritual.onCast?.(projectile);
     }
   }
+
+  spell.castStartTime = Infinity;
 }
 
 export function Resurrect() {
+  if (game.ability.timer < game.ability.cooldown) {
+    return;
+  }
+
+  game.ability.timer = 0;
+
   for (let ritual of game.rituals) {
     ritual.onResurrect?.();
   }

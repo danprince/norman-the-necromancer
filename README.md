@@ -156,6 +156,7 @@ Ideas for rituals
   - Resurrections apply effect to AoE
   - Resurrections can create wardstones instead of skeletons
   - Resurrections do either -2 damage to all villagers, or +1 health
+  - Resurrections stop time for 3 seconds
 - Sustain:
   - Respite: Heal 1 after each wave
   - Backstabber (killing skeletons heals you)
@@ -217,3 +218,18 @@ Wave ideas
   - Some skulls should break randomly
   - Chance to drop skulls should be lower
   - Rituals should be able to hook into resurrections
+
+### Day 13
+- Casts reload 1/s, rituals can take that down to 3/s
+- Casts are capped at 3, but rituals can take that up to 5
+- Ability recharges at 0.1/s
+- Power shots implemented, but not that fun
+- Player UI
+  - Health
+  - Casts
+  - Ability timer
+  - Souls
+- King should spawn guards so that the player has a reservoir of skeletons
+  - Maybe king stops when 50% of the way into the room?
+  - Maybe the king's healthbar is his progress towards the player?
+    - Means the fight always gets toughest towards the end, when guards are spawning directly infront of the player.

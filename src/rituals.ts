@@ -1,9 +1,9 @@
 import { Damage } from "./actions";
-import { Damaging } from "./behaviours";
+import { Damaging, Seeking } from "./behaviours";
 import { tween } from "./engine";
 import * as fx from "./fx";
 import { Behaviour, GameObject, Ritual } from "./game";
-import { angleBetweenPoints, DEG_360, distance, vectorFromAngle, vectorToAngle } from "./helpers";
+import { angleBetweenPoints, DEG_360, distance, randomInt, vectorFromAngle, vectorToAngle } from "./helpers";
 import { Chariot, Projectile, WardStone } from "./objects";
 import { screenshake } from "./renderer";
 import { LIVING, MOBILE, UNDEAD } from "./tags";
@@ -98,40 +98,12 @@ export let Splitshot: Ritual = {
   },
 }
 
-class HomingProjectile extends Behaviour {
-  onFrame(): void {
-    let projectile = this.object;
-    let target: GameObject | undefined;
-    let minDist = 100;
-
-    for (let object of game.objects) {
-      if (object.tags & LIVING) {
-        let dist = distance(projectile, object);
-        if (dist < minDist) {
-          target = object;
-          minDist = dist;
-        }
-      }
-    }
-
-    if (target) {
-      let currentAngle = vectorToAngle(projectile.vx, projectile.vy);
-      let desiredAngle = angleBetweenPoints(projectile, target);
-      let angle = currentAngle + (desiredAngle - currentAngle) / 4;
-      let magnitude = Math.hypot(projectile.vx, projectile.vy);
-      let [vx, vy] = vectorFromAngle(angle);
-      projectile.vx = vx * magnitude;
-      projectile.vy = vy * magnitude;
-    }
-  }
-}
-
 export let Homing: Ritual = {
   tags: HOMING,
   name: "Homing",
   description: "Spells seek living enemies",
   onCast(projectile) {
-    projectile.addBehaviour(new HomingProjectile(projectile));
+    projectile.addBehaviour(new Seeking(projectile));
   },
 }
 
@@ -240,8 +212,8 @@ export let Drunkard: Ritual = {
   name: "Drunkard",
   description: "Do 2x damage, but your aim is wobbly",
   onCast(spell) {
-    spell.vx += Math.random() * 100 - 50;
-    spell.vy += Math.random() * 100 - 50;
+    spell.vx += randomInt(100) - 50;
+    spell.vy += randomInt(100) - 50;
     spell.getBehaviour(Damaging)!.amount *= 2;
   },
 };
@@ -301,10 +273,10 @@ export let Meteoric: Ritual = {
   }
 };
 
-export let Pentagram: Ritual = {
+export let Pentacaster: Ritual = {
   tags: MAX_CASTS,
-  name: "Pentagram",
-  description: "Increase casting capacity to 5x",
+  name: "Pentacaster",
+  description: "5x casts",
   onActive() {
     game.spell.maxCasts = 5;
   }
@@ -313,7 +285,7 @@ export let Pentagram: Ritual = {
 export let Triggerfinger: Ritual = {
   tags: CASTING_RATE,
   name: "Triggerfinger",
-  description: "Casts recharge 2x as fast",
+  description: "Casts recharge 2x faster",
   onActive() {
     game.spell.castRechargeRate /= 2;
   }

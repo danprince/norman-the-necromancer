@@ -62,7 +62,7 @@ export function removeFromArray<T>(array: T[], element: T) {
 }
 
 export function randomElement<T>(items: T[]): T {
-  return items[Math.random() * items.length | 0];
+  return items[randomInt(items.length)];
 }
 
 export function distance(p1: Point, p2: Point): number {
@@ -71,4 +71,12 @@ export function distance(p1: Point, p2: Point): number {
 
 export function vectorToAngle(x: number, y: number): number {
   return Math.atan2(y, x);
+}
+
+export function randomInt(max: number): number {
+  return Math.random() * max | 0;
+}
+
+export function randomFloat(max: number = 1): number {
+  return Math.random() * max;
 }

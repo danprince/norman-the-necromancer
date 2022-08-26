@@ -1,9 +1,9 @@
 import * as sprites from "./sprites.json";
 import * as fx from "./fx";
-import { Behaviour, Game, GameObject } from "./game";
+import { Behaviour, GameObject } from "./game";
 import { BARRIER, CORPSE, LIVING, MISSILE, MOBILE, PLAYER, UNDEAD } from "./tags";
-import { DEG_270, DEG_90, randomElement, vectorFromAngle } from "./helpers";
-import { March, Attack, DespawnTimer, Damaging } from "./behaviours";
+import { DEG_90, randomElement } from "./helpers";
+import { March, Attack, DespawnTimer, Damaging, Bleeding, Enraged } from "./behaviours";
 import { Damage } from "./actions";
 import { tween } from "./engine";
 
@@ -207,5 +207,15 @@ export function Chariot() {
     velocity: [20, 20],
   });
   unit.emitter.start();
+  return unit;
+}
+
+export function RageKnight() {
+  let unit = Villager();
+  unit.sprite = sprites.rage_knight;
+  unit.updateSpeed = 500;
+  unit.hp = unit.maxHp = 5;
+  unit.addBehaviour(new Bleeding(unit));
+  unit.addBehaviour(new Enraged(unit));
   return unit;
 }
