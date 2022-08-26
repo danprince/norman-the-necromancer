@@ -1,9 +1,9 @@
 import * as sprites from "./sprites.json";
 import * as fx from "./fx";
-import { Behaviour, GameObject } from "./game";
-import { CORPSE, LIVING, MISSILE, MOBILE, PLAYER, UNDEAD } from "./tags";
-import { randomOneOf } from "./helpers";
-import { March, Attack, DespawnTimer, VelocityTrail } from "./behaviours";
+import { Behaviour, Game, GameObject } from "./game";
+import { BARRIER, CORPSE, LIVING, MISSILE, MOBILE, PLAYER, UNDEAD } from "./tags";
+import { DEG_270, DEG_90, randomElement, vectorFromAngle } from "./helpers";
+import { March, Attack, DespawnTimer, Damaging } from "./behaviours";
 import { Damage } from "./actions";
 import { tween } from "./engine";
 
@@ -19,10 +19,11 @@ export function Corpse(x: number, y: number) {
 
 export function Player() {
   let player = new GameObject();
-  player.tags = PLAYER;
+  player.tags = PLAYER | UNDEAD;
   player.sprite = sprites.norman_arms_down;
   player.collisionMask = LIVING;
   player.updateSpeed = 1000;
+  player.hp = player.maxHp = 5;
   player.onCollision = unit => {
     Damage(player, 1);
     Damage(unit, 5);
@@ -41,15 +42,11 @@ export function Projectile() {
   object.mass = 100;
   object.emitter = fx.particles();
   object.emitter.start();
-  object.bounce = 0.5;
-  object.friction = 0.5;
+  object.bounce = 0;
+  object.friction = 0.1;
+  object.despawnOnCollision = true;
   object.addBehaviour(new DespawnTimer(object, 3000));
-
-  object.onCollision = target => {
-    Damage(target, 1);
-    game.despawn(object);
-  };
-
+  object.addBehaviour(new Damaging(object));
   return object;
 }
 
@@ -67,14 +64,22 @@ export function Skeleton(x: number, y: number) {
   return unit;
 }
 
+export function SkeletonLord(x: number, y: number) {
+  let unit = Skeleton(x, y);
+  unit.sprite = sprites.big_skeleton;
+  unit.hp = unit.maxHp = 5;
+  unit.updateSpeed = 3000;
+  return unit;
+}
+
 export function Villager() {
   let unit = new GameObject();
-  unit.sprite = randomOneOf(
+  unit.sprite = randomElement([
     sprites.villager_1,
     sprites.villager_2,
     sprites.villager_3,
     sprites.villager_4,
-  );
+  ]);
   unit.x = game.stage.width;
   unit.tags = LIVING | MOBILE;
   unit.hp = unit.maxHp = 1;
@@ -159,3 +164,48 @@ export function Archer() {
   return unit;
 }
 
+export function Jester() {
+  let unit = Villager();
+  unit.sprite = sprites.jester;
+  unit.updateSpeed = 500;
+  unit.hp = unit.maxHp = 2;
+  let hopBack = new March(unit, 16);
+  let hopForward = new March(unit, -16);
+  hopBack.turns = 4;
+  unit.behaviours = [hopForward, hopBack];
+  return unit;
+}
+
+export function WardStone() {
+  let unit = new GameObject();
+  unit.sprite = sprites.wardstone;
+  unit.hp = unit.maxHp = 5;
+  unit.tags = BARRIER;
+  unit.collisionMask = LIVING;
+  unit.mass = 1000;
+  unit.onCollision = object => {
+    Damage(unit, 1);
+    tween(object.x, object.x + 16, 200, x => object.x = x);
+  }
+  return unit;
+}
+
+export function Chariot() {
+  let unit = new GameObject();
+  unit.sprite = sprites.chariot;
+  unit.tags = UNDEAD | MOBILE;
+  unit.collisionMask = LIVING;
+  unit.hp = unit.maxHp = 20;
+  unit.updateSpeed = 100;
+  unit.behaviours.push(new March(unit, 32));
+  unit.behaviours.push(new Attack(unit));
+  unit.emitter = fx.bones().extend({
+    h: 16,
+    frequency: 0.5,
+    duration: [1000, 2000],
+    angle: [DEG_90, 0.5],
+    velocity: [20, 20],
+  });
+  unit.emitter.start();
+  return unit;
+}

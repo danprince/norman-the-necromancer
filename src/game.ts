@@ -1,5 +1,18 @@
-import { ParticleEmitter, Sprite, updateParticles, updateTweens } from "./engine";
-import { clamp, overlaps, Point, Rectangle, removeFromArray, vectorFromAngle } from "./helpers";
+import {
+  ParticleEmitter,
+  Sprite,
+  updateParticles,
+  updateTweens,
+} from "./engine";
+import {
+  clamp,
+  Constructor,
+  overlaps,
+  Point,
+  Rectangle,
+  removeFromArray,
+  vectorFromAngle,
+} from "./helpers";
 
 declare global {
   let game: Game;
@@ -28,6 +41,7 @@ export class GameObject {
   collisionMask = 0;
   hp = 0;
   maxHp = 0;
+  despawnOnCollision = false;
 
   // Behaviours
   behaviours: Behaviour[] = [];
@@ -59,7 +73,13 @@ export class GameObject {
   }
 
   addBehaviour(behaviour: Behaviour) {
-    this.behaviours.push(behaviour);
+    this.behaviours.unshift(behaviour);
+  }
+
+  getBehaviour<T>(constructor: Constructor<T>): T | undefined {
+    return this.behaviours.find(
+      behaviour => behaviour instanceof constructor,
+    ) as T | undefined;
   }
 
   removeBehaviour(behaviour: Behaviour) {
@@ -98,6 +118,10 @@ export class GameObject {
     for (let behaviour of this.behaviours) {
       behaviour.onCollision(target);
     }
+
+    if (this.despawnOnCollision) {
+      game.despawn(this);
+    }
   }
 }
 
@@ -128,10 +152,12 @@ export interface Spell {
   targetAngle: number;
   targetRadius: number;
   targetPower: number;
-  roundsPerCast: number;
-  roundsDelay: number;
   shotsPerRound: number;
   shotOffsetAngle: number;
+  maxCasts: number;
+  currentCasts: number;
+  castRechargeRate: number;
+  castRechargeTimer: number;
 }
 
 export interface Ability {
@@ -139,19 +165,35 @@ export interface Ability {
   timer: number;
 }
 
+export interface Ritual {
+  name: string;
+  description: string;
+  tags: number;
+  exclusiveTags?: number;
+  requiredTags?: number;
+  onFrame?(dt: number): void;
+  onActive?(): void;
+  onCast?(projectile: GameObject): void;
+  onResurrect?(): void;
+  onDeath?(object: GameObject): void;
+}
+
 export class Game {
   stage: Stage = { width: 400, height: 200, floor: 0, ceiling: 200 };
   objects: GameObject[] = [];
   player: GameObject = undefined!;
+  rituals: Ritual[] = [];
 
   spell: Spell = {
     targetAngle: 0,
     targetRadius: 15,
     targetPower: 160,
-    roundsDelay: 50,
-    roundsPerCast: 1,
     shotsPerRound: 1,
-    shotOffsetAngle: 0.3,
+    shotOffsetAngle: 0.1,
+    maxCasts: 3,
+    currentCasts: 3,
+    castRechargeRate: 1000,
+    castRechargeTimer: 0,
   };
 
   ability: Ability = {
@@ -174,11 +216,55 @@ export class Game {
     removeFromArray(this.objects, object);
   }
 
+  addRitual(ritual: Ritual) {
+    this.rituals.push(ritual);
+    ritual.onActive?.();
+  }
+
+  canAddRitual(ritual: Ritual) {
+    if (ritual.exclusiveTags) {
+      for (let other of this.rituals) {
+        if (ritual.exclusiveTags & other.tags) {
+          return false;
+        }
+      }
+    }
+
+    if (ritual.requiredTags) {
+      for (let other of this.rituals) {
+        if (ritual.requiredTags & other.tags) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    return true;
+  }
+
   update(dt: number) {
+    this.updateSpell(dt);
     this.updateObjects(dt);
     this.updatePhysics(dt);
+    this.updateRituals(dt);
     updateTweens(dt);
     updateParticles(dt);
+  }
+
+  private updateSpell(dt: number) {
+    if (this.spell.currentCasts < this.spell.maxCasts) {
+      this.spell.castRechargeTimer += dt;
+      if (this.spell.castRechargeTimer > this.spell.castRechargeRate) {
+        this.spell.currentCasts += 1;
+        this.spell.castRechargeTimer = 0;
+      }
+    }
+  }
+
+  private updateRituals(dt: number) {
+    for (let ritual of this.rituals) {
+      ritual.onFrame?.(dt);
+    }
   }
 
   private updateObjects(dt: number) {
@@ -211,8 +297,8 @@ export class Game {
         object.vy *= -object.bounce;
       }
 
-      if (object.y === 0) {
-        object.vx *= object.friction;
+      if (object.y === lower || object.y === upper) {
+        object.vx *= (1 - object.friction);
       }
 
       if (object.mass && object.y > 0) {

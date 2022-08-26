@@ -239,12 +239,19 @@ export class ParticleEmitter {
     particleEmitters.push(this);
   }
 
+  clone(): ParticleEmitter {
+    return Object.assign(new ParticleEmitter, this, {
+      particles: new Set(),
+    });
+  }
+
   extend(options: Partial<ParticleEmitter>) {
     return Object.assign(this, options);
   }
 
   start() {
     this.active = true;
+    return this;
   }
 
   stop() {

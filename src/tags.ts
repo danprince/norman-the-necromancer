@@ -4,3 +4,4 @@ export const UNDEAD = 1 << 2;
 export const CORPSE = 1 << 3;
 export const MISSILE = 1 << 4;
 export const PLAYER = 1 << 5;
+export const BARRIER = 1 << 6;

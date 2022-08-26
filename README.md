@@ -103,3 +103,117 @@ Reworking the engine to focus on single spell/ability depth.
 
 ### Day 8
 - [ ] Should behaviour be an interface `unit.addBehaviour({ onCollision: ... })`
+
+Ideas for wave structure
+- Preset pattern
+- Random pattern with preset challenges
+- Budget with weighting
+
+Ideas for rituals
+- Splitshot
+- Straight shots
+- Homing shots
+- Powerup on bounce
+- Tough Skeletons
+- Skeleton lord
+- Enemies killed by undead drop 2x souls
+- Chance for skeletons to drop corpses
+- Direct hits stun enemies
+- Explosions stun enemies
+- Glass cannon (1 HP, 2x damage)
+- Critical hit chance
+- Increase max hp
+- Gain souls after completing a wave
+- Alchemist: More potions? More potion slots?
+- Bloodbank: 2x more villagers will spawn
+- Projectiles:
+  - Drunkard: Projectiles do 2x damage, but aim is randomised (by a small degree)
+  - Bouncing
+  - Explosive
+  - Split on bounce
+  - Split on downwards velocity
+  - Piercing
+  - Knockback
+  - Projectiles have a 10% chance to cause curse X
+  - Projectiles have a 5% chance to cause a random curse
+- Environment:
+  - Ceiling
+- Casting:
+  - Increase casting capacity
+  - Increase casting cooldown
+  - You fire faster 50% faster, and enemies are 25% faster
+  - Fire in bursts of 3 shots, but firing is now automatic
+- Effects:
+  - Hex: Health is reduced by 1 each turn, to a minimum of 1
+  - Vulnerable: 5x more likely to receive critical damage
+  - Slow: Act twice as slowly (or move half as far?)
+  - Marked: If killed whilst marked, 100% chance to become a corpse
+  - Sleep: Do nothing for 3 turns
+- Resurrections:
+  - Gravedigger, waves start with existing corpses
+  - Resurrections stun enemies
+  - Resurrections heal undead allies
+  - Resurrections apply effect to AoE
+  - Resurrections can create wardstones instead of skeletons
+  - Resurrections do either -2 damage to all villagers, or +1 health
+- Sustain:
+  - Respite: Heal 1 after each wave
+  - Backstabber (killing skeletons heals you)
+  - Pariah: Shield that absorbs impact but takes 10 seconds to return
+- Wardstones:
+  - Projectiles sometimes create a wardstone (5%)
+  - Wardstones have 50% health but return after 10 seconds
+  - Wardstones heal skeletons as they pass
+  - Wardstones reflect damage
+  - Wardstones explode on destruction
+  - Wardstones cause enemies to become stunned
+  - Wardstones slowly heal themselves
+  - Hitting a wardstone heals it
+  - Hitting a wardstone causes an explosion
+  - Enemies that touch a wardstone become cursed
+  - Start each wave with a wardstone infront of you
+  - Look Up: Wardstones periodically drop from above
+
+Wall decorations
+- Torch
+- Prison cell
+- Gravestone
+- Banner
+
+Ideas for challenges:
+- Huge wave of villagers (spread small damage)
+- Trio of archers (neutralise quickly)
+- Monks + champion
+- Something where you can trade some HP for souls
+- Shelled knights
+- Spearmen with erratic patterns
+- Wizard that shoots projectiles at you
+- Static enemies that are "woken up" on damage (spiders?)
+
+"Norman wasn't particularly popular in the town, and that was _before_ he became a necromancer."
+
+### Day 9
+Some rituals probably need to be mutually exclusive and others need requirements. E.g. split on bounce requires bounce and probably should be exclusive with splitshot. May need tags + ids. Maybe just tags is good enough (e.g. check for `BOUNCE` tag when generating bounce upgrades).
+
+Wave ideas
+1. 3 waves of villagers, and one wave with a tougher enemy
+2. Each wave of villagers has a tough enemy
+3. 10 villagers and a challenge
+
+### Day 10
+- Figure out firing mechanics
+  - Casting speed
+  - Recharge cooldown
+  - Casting capacity
+  - Projectile lifetime
+- Figure out level mechanics
+- Stone mechanics
+  - How are stones created?
+    - Small percentage chance on bounce/kill/resurrect?
+    - Throwables?
+  - Bloodstones that heal Norman when destroyed?
+- Curses
+- Resurrection mechanics
+  - Some skulls should break randomly
+  - Chance to drop skulls should be lower
+  - Rituals should be able to hook into resurrections

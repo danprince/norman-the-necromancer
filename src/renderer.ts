@@ -52,6 +52,7 @@ function drawBackground() {
   for (let i = 0; i < game.stage.width / 16; i++) {
     drawSceneSprite(sprites.wall, i * 16, 0);
     drawSceneSprite(sprites.floor, i * 16, -16);
+    drawSceneSprite(sprites.ceiling, i * 16, game.stage.ceiling);
   }
 }
 

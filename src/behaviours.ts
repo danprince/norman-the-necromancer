@@ -1,7 +1,35 @@
+import * as fx from "./fx";
+import * as sprites from "./sprites.json";
 import { Damage } from "./actions";
 import { tween } from "./engine";
 import { Behaviour, GameObject } from "./game";
 import { screenshake } from "./renderer";
+
+export class Hex extends Behaviour {
+  private hexSpeed = 3000;
+  private hexTimer = 0;
+
+  constructor(object: GameObject) {
+    super(object);
+    object.emitter = fx.cloud({ x: 0, y: 0, w: 0, h: 0 }, [
+      [sprites.p_purple_1, sprites.p_purple_2, sprites.p_purple_3],
+      [sprites.p_purple_2, sprites.p_purple_3],
+    ]).extend({ frequency: 0.05 }).start();
+  }
+
+  onFrame(dt: number): void {
+    if ((this.hexTimer += dt) < this.hexSpeed) return;
+
+    this.hexTimer = 0;
+    Object.assign(this.object.emitter!, this.object.bounds());
+    this.object.emitter!.burst(20);
+
+    // Hex can't kill
+    if (this.object.hp > 1) {
+      Damage(this.object, 1);
+    }
+  }
+}
 
 export class Attack extends Behaviour {
   constructor(object: GameObject) {
@@ -9,8 +37,10 @@ export class Attack extends Behaviour {
   }
 
   onCollision(target: GameObject): void {
-    Damage(target, this.object.hp);
-    Damage(this.object, this.object.hp);
+    let dealDamage = this.object.hp;
+    let takeDamage = target.hp;
+    Damage(target, dealDamage);
+    Damage(this.object, takeDamage);
   }
 }
 
@@ -59,9 +89,9 @@ export class March extends Behaviour {
   }
 }
 
-export class VelocityTrail extends Behaviour {
-  onFrame() {
-    let energy = Math.hypot(this.object.vx, this.object.vy) * 1.5;
-    this.object.emitter!.frequency = energy / 100;
+export class Damaging extends Behaviour {
+  amount = 1;
+  onCollision(target: GameObject): void {
+    Damage(target, this.amount);
   }
 }
