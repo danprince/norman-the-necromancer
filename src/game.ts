@@ -1,9 +1,8 @@
 import {
   ParticleEmitter,
   Sprite,
-  updateParticles,
-  updateTweens,
 } from "./engine";
+
 import {
   clamp,
   Constructor,
@@ -48,6 +47,10 @@ export class GameObject {
   updateSpeed = 0;
   updateClock = 0;
 
+  is(mask: number): boolean {
+    return (this.tags & mask) > 0;
+  }
+
   bounds() {
     return Rectangle(this.x, this.y, this.sprite[2], this.sprite[3]);
   }
@@ -74,16 +77,18 @@ export class GameObject {
 
   addBehaviour(behaviour: Behaviour) {
     this.behaviours.unshift(behaviour);
+    behaviour.onAdded();
+  }
+
+  removeBehaviour(behaviour: Behaviour) {
+    removeFromArray(this.behaviours, behaviour);
+    behaviour.onRemoved();
   }
 
   getBehaviour<T>(constructor: Constructor<T>): T | undefined {
     return this.behaviours.find(
       behaviour => behaviour instanceof constructor,
     ) as T | undefined;
-  }
-
-  removeBehaviour(behaviour: Behaviour) {
-    removeFromArray(this.behaviours, behaviour);
   }
 
   onFrame(dt: number) {
@@ -96,8 +101,7 @@ export class GameObject {
     for (let behaviour of this.behaviours) {
       if (++behaviour.timer >= behaviour.turns) {
         behaviour.timer = 0;
-        let skip = behaviour.onUpdate();
-        if (skip) break;
+        if (behaviour.onUpdate()) break;
       }
     }
   }
@@ -129,6 +133,8 @@ export class Behaviour {
   constructor(public object: GameObject) {}
   turns = 1;
   timer = 0;
+  onAdded() {}
+  onRemoved() {}
   onUpdate(): boolean | void {}
   onBounce() {}
   onDamage(damage: Damage) {}
@@ -156,7 +162,7 @@ export interface Spell {
   shotsPerRound: number;
   shotOffsetAngle: number;
   maxCasts: number;
-  currentCasts: number;
+  casts: number;
   castRechargeRate: number;
   castRechargeTimer: number;
   castStartTime: number;
@@ -173,9 +179,10 @@ export interface Ritual {
   tags: number;
   exclusiveTags?: number;
   requiredTags?: number;
+  depth?: number;
   onFrame?(dt: number): void;
   onActive?(): void;
-  onCast?(projectile: GameObject): void;
+  onCast?(spell: GameObject): void;
   onResurrect?(): void;
   onDeath?(object: GameObject): void;
 }
@@ -189,11 +196,11 @@ export class Game {
   spell: Spell = {
     targetAngle: 0,
     targetRadius: 15,
-    basePower: 160,
+    basePower: 120,
     shotsPerRound: 1,
     shotOffsetAngle: 0.1,
     maxCasts: 3,
-    currentCasts: 3,
+    casts: 3,
     castRechargeRate: 1000,
     castRechargeTimer: 0,
     castStartTime: Infinity,
@@ -201,7 +208,7 @@ export class Game {
 
   ability: Ability = {
     cooldown: 10_000,
-    timer: 0,
+    timer: 10_000,
   };
 
   constructor(player: GameObject) {
@@ -210,12 +217,19 @@ export class Game {
     window.game = this;
   }
 
-  spawn(object: GameObject) {
+  spawn(object: GameObject, x = object.x, y = object.y) {
+    object.x = x;
+    object.y = y;
     this.objects.push(object);
   }
 
   despawn(object: GameObject) {
     object.emitter?.remove();
+
+    for (let behaviour of object.behaviours) {
+      object.removeBehaviour(behaviour);
+    }
+
     removeFromArray(this.objects, object);
   }
 
@@ -250,17 +264,15 @@ export class Game {
     this.updateObjects(dt);
     this.updatePhysics(dt);
     this.updateRituals(dt);
-    updateTweens(dt);
-    updateParticles(dt);
   }
 
   private updateSpell(dt: number) {
-    game.ability.timer += dt;
+    game.ability.timer -= dt;
 
-    if (this.spell.currentCasts < this.spell.maxCasts) {
+    if (this.spell.casts < this.spell.maxCasts) {
       this.spell.castRechargeTimer += dt;
       if (this.spell.castRechargeTimer > this.spell.castRechargeRate) {
-        this.spell.currentCasts += 1;
+        this.spell.casts += 1;
         this.spell.castRechargeTimer = 0;
       }
     }
@@ -321,6 +333,14 @@ export class Game {
             }
           }
         }
+      }
+    }
+  }
+
+  onCast(spell: GameObject, depth = 0) {
+    for (let ritual of game.rituals) {
+      if (depth === 0 || ritual.depth! >= depth) {
+        ritual.onCast?.(spell);
       }
     }
   }

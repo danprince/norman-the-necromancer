@@ -233,3 +233,26 @@ Wave ideas
   - Maybe king stops when 50% of the way into the room?
   - Maybe the king's healthbar is his progress towards the player?
     - Means the fight always gets toughest towards the end, when guards are spawning directly infront of the player.
+- Rituals that affect every N-th shot.
+  - Every 3rd shot is explosive
+- Kapala
+- Tiered rituals
+  - Ritual type
+  - Ritual level
+  - Example
+    - Every 3rd cast is piercing
+    - Power shots are piercing
+    - Every shot is piercing
+
+- Necronomicon
+  - +1 max health
+  - +1 health
+  - +1 spell capacity
+  - 3 rituals
+
+## Day 14
+- Spawn structure + shop
+- Soul bonuses
+  - Direct hit
+  - Long shot
+  - Power shot

@@ -7,8 +7,15 @@ export default defineConfig({
     assetsInlineLimit: 0,
     minify: "terser",
     terserOptions: {
+      compress: {
+        unsafe_arrows: true,
+        passes: 2,
+      },
       mangle: {
-        properties: true,
+        properties: {
+          // Glyph width overrides in font.json need to be preserved.
+          keep_quoted: true
+        },
       },
     },
     rollupOptions: {

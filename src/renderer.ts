@@ -1,6 +1,5 @@
 import * as sprites from "./sprites.json";
 import { canvas, clear, ctx, drawSceneSprite, drawSprite, particleEmitters, Sprite, write } from "./engine";
-import { GameObject } from "./game";
 import { Point, randomInt } from "./helpers";
 
 let screenShakeTimer = 0;
@@ -38,8 +37,6 @@ export function render(dt: number) {
 }
 
 function drawHud() {
-  ctx.save();
-  ctx.translate(0, 0);
   drawSprite(sprites.norman_icon, 0, 0);
 
   for (let i = 0; i < game.player.maxHp; i++) {
@@ -48,21 +45,48 @@ function drawHud() {
   }
 
   for (let i = 0; i < game.spell.maxCasts; i++) {
-    let sprite = i < game.spell.currentCasts ? sprites.cast_orb : sprites.cast_orb_empty;
+    let sprite = i < game.spell.casts ? sprites.cast_orb : sprites.cast_orb_empty;
     drawSprite(sprite, 11 + i * 4, 6);
   }
 
-  ctx.restore();
+  //ctx.save();
+  //let width = 82;
+  //let filled = 1 - clamp(game.ability.timer / game.ability.cooldown, 0, 1);
+  //ctx.translate(200, 0);
+  //ctx.fillStyle = "#174a3e";
+  //ctx.fillRect(1, 1, filled * width | 0, 10);
+  //drawNineSlice(sprites.frame_grey, 0, 0, width, 11);
+  //drawSprite(sprites.p_skull, 3, 4);
+  //write(`Resurrect (SPC)`, 9, 3);
+  //ctx.restore();
+}
+
+function drawOrbs(
+  x: number,
+  y: number,
+  value: number,
+  maxValue: number,
+  sprite: Sprite,
+  emptySprite: Sprite,
+) {
+  let x0 = x - (maxValue * 4) / 2;
+  for (let i = 0; i < maxValue; i++) {
+    drawSceneSprite(i < value ? sprite : emptySprite, x0 + i * 4, y);
+  }
 }
 
 function drawObjects() {
   for (let object of game.objects) {
     drawSceneSprite(object.sprite, object.x, object.y + object.hop);
 
-    if (object != game.player) {
-      if (object.maxHp > 1 && object.maxHp <= 10) {
-        drawHealthOrbs(object);
-      }
+    if (object.maxHp === 1 || object === game.player) continue;
+
+    if (object.maxHp < 10) {
+      let { x } = object.center();
+      drawOrbs(x, -6, object.hp, object.maxHp, sprites.health_orb, sprites.health_orb_empty);
+    } else {
+      drawSceneSprite(sprites.health_orb, object.x, -10);
+      write(`${object.hp}/${object.maxHp}`, object.x + 6, 4);
     }
   }
 }
@@ -75,33 +99,10 @@ function drawBackground() {
   }
 }
 
-function drawHealthOrbs(object: GameObject) {
-  let origin = object.center();
-  let x = origin.x - (object.maxHp * 4) / 2;
-  let y = object.y - 7;
-  for (let i = 0; i < object.maxHp; i++) {
-    let sprite = i < object.hp ? sprites.health_orb : sprites.health_orb_empty;
-    drawSceneSprite(sprite, x + i * 4, y);
-  }
-}
-
 function drawReticle() {
   let { x, y } = game.getCastingPoint();
   let sprite = sprites.reticle;
   drawSceneSprite(sprite, x - sprite[2] / 2, y - sprite[3] / 2);
-
-  let energy = game.getCastingEnergy();
-  let p0 = game.player.center();
-  let p1 = game.getCastingPoint();
-  let dx = p1.x - p0.x;
-  let dy = p1.y - p0.y;
-
-  for (let i = 0; i < energy; i += 0.2) {
-    let x = p0.x + dx * i;
-    let y = p0.y + dy * i;
-    let sprite = sprites.cast_pip;
-    drawSceneSprite(sprite, x - sprite[2] / 2, y - sprite[3] / 2);
-  }
 }
 
 function drawParticles() {

@@ -80,3 +80,7 @@ export function randomInt(max: number): number {
 export function randomFloat(max: number = 1): number {
   return Math.random() * max;
 }
+
+export function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}

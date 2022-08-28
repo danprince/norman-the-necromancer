@@ -1,10 +1,10 @@
 import * as sprites from "./sprites.json";
 import * as fx from "./fx";
 import { Behaviour, GameObject } from "./game";
-import { BARRIER, CORPSE, LIVING, MISSILE, MOBILE, PLAYER, UNDEAD } from "./tags";
-import { DEG_90, randomElement } from "./helpers";
-import { March, Attack, DespawnTimer, Damaging, Bleeding, Enraged } from "./behaviours";
-import { Damage } from "./actions";
+import { BARRIER, CORPSE, LIVING, SPELL, MOBILE, PLAYER, UNDEAD } from "./tags";
+import { DEG_90, randomElement, randomInt } from "./helpers";
+import { March, Attack, DespawnTimer, Damaging, Bleeding, Enraged, Summon } from "./behaviours";
+import { Damage, Die } from "./actions";
 import { tween } from "./engine";
 
 export function Corpse(x: number, y: number) {
@@ -19,14 +19,15 @@ export function Corpse(x: number, y: number) {
 
 export function Player() {
   let player = new GameObject();
+  player.x = 5;
   player.tags = PLAYER | UNDEAD;
   player.sprite = sprites.norman_arms_down;
   player.collisionMask = LIVING;
   player.updateSpeed = 1000;
   player.hp = player.maxHp = 5;
   player.onCollision = unit => {
-    Damage(player, 1);
-    Damage(unit, 5);
+    Damage(player, unit.hp);
+    Die(unit);
     if (player.hp <= 0) {
       window.location = window.location;
     }
@@ -34,14 +35,13 @@ export function Player() {
   return player;
 }
 
-export function Projectile() {
+export function Spell() {
   let object = new GameObject();
   object.sprite = sprites.p_green_skull;
-  object.tags = MISSILE;
+  object.tags = SPELL;
   object.collisionMask = MOBILE;
   object.mass = 100;
   object.emitter = fx.particles();
-  object.emitter.start();
   object.bounce = 0;
   object.friction = 0.1;
   object.despawnOnCollision = true;
@@ -80,6 +80,8 @@ export function Villager() {
     sprites.villager_3,
     sprites.villager_4,
   ]);
+  unit.friction = 0.8;
+  unit.mass = 75;
   unit.x = game.stage.width;
   unit.tags = LIVING | MOBILE;
   unit.hp = unit.maxHp = 1;
@@ -92,8 +94,46 @@ export function TheKing() {
   let unit = Villager();
   unit.sprite = sprites.the_king;
   unit.updateSpeed = 5000;
-  unit.hp = unit.maxHp = 200;
-  unit.behaviours.push(new March(unit, -32));
+  unit.hp = unit.maxHp = 20;
+  unit.behaviours = [];
+  unit.mass = 1000;
+
+  let phase = 1
+  let marching = new March(unit, -32);
+  let summons = new Summon(unit, RoyalGuard, 1000);
+  let enraged = new Enraged(unit, SPELL);
+  let boss = new Behaviour(unit);
+
+  unit.addBehaviour(marching);
+  unit.addBehaviour(boss);
+
+  boss.onDamage = ({ amount }) => {
+    let willDie = unit.hp - amount <= 0;
+
+    if (phase === 1 && willDie) {
+      phase = 2;
+      unit.addBehaviour(summons);
+      unit.addBehaviour(enraged);
+      unit.removeBehaviour(marching);
+      unit.hp = amount + 1;
+    } else if (phase === 3 && willDie) {
+      phase = 4;
+      unit.hp = unit.maxHp = unit.maxHp / 2;
+      unit.sprite = sprites.the_king_on_foot;
+      unit.updateSpeed = unit.updateClock = 500;
+      marching.step /= 2;
+    }
+  };
+
+  summons.onSummon = () => {
+    if (summons.summonCounter >= 10) {
+      phase = 3;
+      unit.removeBehaviour(enraged);
+      unit.addBehaviour(marching);
+      unit.removeBehaviour(summons);
+    }
+  };
+
   return unit;
 }
 
@@ -101,21 +141,22 @@ export function Champion() {
   let unit = Villager();
   unit.sprite = sprites.champion;
   unit.updateSpeed = 2000;
-  unit.hp = unit.maxHp = 5;
+  unit.hp = unit.maxHp = 10;
   return unit;
 }
 
 export function ShellKnight() {
   let unit = Villager();
   unit.sprite = sprites.shell_knight_up;
-  unit.updateSpeed = 2000;
+  unit.updateSpeed = 1000;
   unit.hp = unit.maxHp = 3;
 
   let shell = new Behaviour(unit);
   let shelled = false;
+  let timer = 0;
 
   shell.onUpdate = () => {
-    shelled = !shelled;
+    shelled = timer++ % 3 > 0;
     unit.sprite = shelled ? sprites.shell_knight_down : sprites.shell_knight_up;
   };
 
@@ -140,8 +181,8 @@ export function Monk() {
   heal.turns = 5;
   heal.onUpdate = () => {
     for (let object of game.objects) {
-      if (object.tags & LIVING) {
-        Damage(object, -1);
+      if (object.is(LIVING)) {
+        Damage(object, -1, unit);
       }
     }
 
@@ -164,15 +205,19 @@ export function Archer() {
   return unit;
 }
 
-export function Jester() {
+export function Piper() {
   let unit = Villager();
-  unit.sprite = sprites.jester;
+  unit.sprite = sprites.piper;
   unit.updateSpeed = 500;
-  unit.hp = unit.maxHp = 2;
-  let hopBack = new March(unit, 16);
-  let hopForward = new March(unit, -16);
-  hopBack.turns = 4;
-  unit.behaviours = [hopForward, hopBack];
+  unit.hp = unit.maxHp = 10;
+  unit.addBehaviour(new Summon(unit, Rat, 1250));
+  return unit;
+}
+
+export function Rat() {
+  let unit = Villager();
+  unit.sprite = sprites.rat;
+  unit.updateSpeed = 200;
   return unit;
 }
 
@@ -206,16 +251,36 @@ export function Chariot() {
     angle: [DEG_90, 0.5],
     velocity: [20, 20],
   });
-  unit.emitter.start();
   return unit;
 }
 
 export function RageKnight() {
   let unit = Villager();
   unit.sprite = sprites.rage_knight;
-  unit.updateSpeed = 500;
+  unit.updateSpeed = 1000;
   unit.hp = unit.maxHp = 5;
   unit.addBehaviour(new Bleeding(unit));
-  unit.addBehaviour(new Enraged(unit));
+  unit.addBehaviour(new Enraged(unit, SPELL));
+  return unit;
+}
+
+export function RoyalGuard() {
+  let unit = Villager();
+  unit.sprite = sprites.royal_guard;
+  unit.hp = unit.maxHp = 5;
+  return unit;
+}
+
+export function Wizard() {
+  let unit = Villager();
+  unit.sprite = sprites.wizard;
+  unit.hp = unit.maxHp = 3;
+  return unit;
+}
+
+export function Spearman() {
+  let unit = Villager();
+  unit.sprite = sprites.spearman;
+  unit.hp = unit.maxHp = 2;
   return unit;
 }

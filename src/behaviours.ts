@@ -2,7 +2,7 @@ import * as fx from "./fx";
 import * as sprites from "./sprites.json";
 import { Damage } from "./actions";
 import { tween } from "./engine";
-import { Behaviour, GameObject } from "./game";
+import { Behaviour, Game, GameObject } from "./game";
 import { screenshake } from "./renderer";
 import type { Damage as Dmg } from "./game";
 import { distance, vectorToAngle, angleBetweenPoints, vectorFromAngle } from "./helpers";
@@ -66,30 +66,42 @@ export class Damaging extends Behaviour {
 export class Bleeding extends Behaviour {
   override turns = 3;
 
+  emitter = fx.cloud({ x: 0, y: 0, w: 0, h: 0 }, [
+    [sprites.health_orb, sprites.health_pip],
+    [sprites.health_pip]
+  ]).extend({
+    mass: [10, 30],
+    velocity: [10, 30],
+    frequency: 0,
+  });
+
   onUpdate(): boolean | void {
-    this.object.emitter?.burst(1);
+    this.emitter.extend(this.object.center());
+    this.emitter?.burst(1);
     Damage(this.object, 1, this.object);
   }
 }
 
 export class Enraged extends Behaviour {
-  constructor(object: GameObject) {
+  emitter = fx.cloud({ x: 0, y: 0, w: 0, h: 0 }, [
+    [sprites.health_orb, sprites.health_pip],
+    [sprites.health_pip]
+  ]).extend({
+    mass: [10, 30],
+    velocity: [10, 30],
+    frequency: 0,
+  });
+
+  constructor(object: GameObject, public mask: number) {
     super(object);
-    object.emitter = fx.cloud({ x: 0, y: 0, w: 0, h: 0 }, [
-      [sprites.health_orb, sprites.health_pip],
-      [sprites.health_pip]
-    ]).extend({
-      mass: [10, 30],
-      velocity: [10, 30],
-    });
   }
 
   onDamage(damage: Dmg): void {
-    // Ignore self-inflicted damage
-    if (damage.dealer == this.object) return;
-    Damage(this.object, -damage.amount, this.object);
-    damage.amount = 0;
-    this.object.emitter?.extend(this.object.bounds()).burst(4);
+    if (damage.dealer && damage.dealer.is(this.mask)) {
+      Damage(this.object, -damage.amount, this.object);
+      damage.amount = 0;
+      this.emitter.extend(this.object.bounds()).burst(4);
+    }
   }
 }
 
@@ -100,7 +112,7 @@ export class Seeking extends Behaviour {
     let minDist = 100;
 
     for (let object of game.objects) {
-      if (object.tags & this.object.collisionMask) {
+      if (object.is(this.object.collisionMask)) {
         let dist = distance(projectile, object);
         if (dist < minDist) {
           target = object;
@@ -117,6 +129,31 @@ export class Seeking extends Behaviour {
       let [vx, vy] = vectorFromAngle(angle);
       projectile.vx = vx * magnitude;
       projectile.vy = vy * magnitude;
+    }
+  }
+}
+
+export class Summon extends Behaviour {
+  private summonTimer = 0;
+  public summonCounter = 0;
+
+  constructor(
+    object: GameObject,
+    private create: () => GameObject,
+    private summonSpeed: number,
+  ) {
+    super(object);
+  }
+
+  onSummon(object: GameObject) {}
+
+  onFrame(dt: number): void {
+    if ((this.summonTimer += dt) > this.summonSpeed) {
+      this.summonTimer = 0;
+      this.summonCounter++;
+      let object = this.create();
+      game.spawn(object, this.object.x, this.object.y);
+      this.onSummon(object);
     }
   }
 }

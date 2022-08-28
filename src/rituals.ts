@@ -1,12 +1,50 @@
 import { Damage } from "./actions";
-import { Damaging, Seeking } from "./behaviours";
+import { Bleeding, Damaging, Seeking } from "./behaviours";
 import { tween } from "./engine";
 import * as fx from "./fx";
-import { Behaviour, GameObject, Ritual } from "./game";
-import { angleBetweenPoints, DEG_360, distance, randomInt, vectorFromAngle, vectorToAngle } from "./helpers";
-import { Chariot, Projectile, WardStone } from "./objects";
+import * as sprites from "./sprites.json";
+import { Behaviour, Game, GameObject, Ritual } from "./game";
+import { angleBetweenPoints, clamp, DEG_180, DEG_360, distance, randomInt, vectorFromAngle, vectorToAngle } from "./helpers";
+import { Chariot, Spell, WardStone } from "./objects";
 import { screenshake } from "./renderer";
 import { LIVING, MOBILE, UNDEAD } from "./tags";
+
+/*
+- Every nth shot
+- Power shot
+- Casting Modifiers
+  - Increased casting capacity
+  - Increased casting charge speed
+  - One cast creates 3 spells
+- Spell Modifiers
+  - Drunk: Random aim but 2x damage
+  - Straight: Spells do not drop
+  - Homing: Spells seek enemies
+  - Knockback: Enemies are knocked back and stunned
+  - Piercing: Spells pass through enemies
+  - Explosive: Spells explode on impact
+    - Craters: Explosion size determined by downward velocity
+  - Bouncy: Spells bounce on surfaces
+    - Spells split on bounce
+- Corpses
+  - % chance on projectile bounce
+  - % chance on kill
+  - % chance on direct hit
+- Game changers
+  - Corridor: Ceiling
+  - Forsaken: 1hp, 3x damage
+- Sustain
+  - One-off increase to max HP
+  - Small chance to regain HP on kill
+- Curses
+  - Stun: Inactive for 3 seconds
+  - Bleed: Lose 1hp every 3 turns
+  - Doom: Guaranteed to leave a corpse
+- Wardstones
+- Souls
+- Resurrections:
+  - 10% chance to create skeleton lord
+*/
 
 // Ritual tags
 const NONE = 0;
@@ -16,6 +54,7 @@ const EXPLOSIVE = 1 << 2;
 const HOMING = 1 << 3;
 const MAX_CASTS = 1 << 4;
 const CASTING_RATE = 1 << 5;
+const CURSE = 1 << 6;
 
 export let Bouncing: Ritual = {
   tags: BOUNCING,
@@ -29,7 +68,7 @@ export let Bouncing: Ritual = {
 class ProjectileSplitOnBounce extends Behaviour {
   onBounce(): void {
     let p1 = this.object;
-    let p2 = Projectile();
+    let p2 = Spell();
     p2.x = p1.x;
     p2.y = p1.y;
     p2.vx = p1.vy;
@@ -54,13 +93,13 @@ class ProjectileExplode extends Behaviour {
   onCollision = this.explode;
 
   explode() {
-    let proj = this.object;
-    game.despawn(proj);
+    let spell = this.object;
+    game.despawn(spell);
 
     for (let object of game.objects) {
-      if (object.tags & LIVING) {
-        if (distance(proj, object) < 50) {
-          Damage(object, 1);
+      if (object.is(this.object.collisionMask)) {
+        if (distance(spell, object) < 50) {
+          Damage(object, 1, spell);
         }
       }
     }
@@ -68,7 +107,7 @@ class ProjectileExplode extends Behaviour {
     screenshake(50);
     fx.particles()
       .extend({
-        ...proj.center(),
+        ...spell.center(),
         velocity: [50, 100],
         angle: [0, DEG_360],
         duration: [200, 500],
@@ -83,6 +122,7 @@ export let Explosive: Ritual = {
   exclusiveTags: BOUNCING,
   name: "Explosive",
   description: "Spells explode on impact",
+  depth: Infinity,
   onCast(projectile) {
     projectile.addBehaviour(new ProjectileExplode(projectile));
   },
@@ -131,6 +171,18 @@ export let Piercing: Ritual = {
 class KnockbackSpell extends Behaviour {
   onCollision(target: GameObject): void {
     tween(target.x, target.x + 16, 200, x => target.x = x);
+    //target.addBehaviour(new Stunned(target));
+
+    // Knock objects backwards
+    //for (let object of game.objects) {
+    //  if (this.object.collisionMask & object.tags) {
+    //    let dist = distance(this.object, object);
+    //    let scale = 1 - clamp(dist / 50, 0, 1);
+    //    let [vx] = vectorFromAngle(angleBetweenPoints(this.object, object));
+    //    object.vx = vx * 50 * scale;
+    //    object.vy = 100 * scale;
+    //  }
+    //}
   }
 }
 
@@ -152,39 +204,16 @@ export let Ceiling: Ritual = {
   },
 };
 
-class RicochetSpell extends Behaviour {
-  onBounce(): void {
-    let damaging = this.object.getBehaviour(Damaging);
-    if (damaging) {
-      damaging.amount += 1;
-      if (this.object.emitter) {
-        this.object.emitter.frequency = damaging.amount;
-      }
-    }
-  }
-}
-
-export let Ricochet: Ritual = {
-  tags: NONE,
-  requiredTags: BOUNCING,
-  name: "Ricochet",
-  description: "Spells increase +1 damage each time they bounce, but direct hits do 0 damage",
-  onCast(spell) {
-    let damaging = spell.getBehaviour(Damaging);
-    if (damaging) damaging.amount = 0;
-    spell.addBehaviour(new RicochetSpell(spell));
-    if (spell.emitter) spell.emitter.frequency = 0;
-  },
-};
-
 class RainSpell extends Behaviour {
   split = false;
   onFrame(): void {
     if (!this.split && this.object.vy < 0) {
       this.split = true;
       let p0 = this.object;
-      let p1 = Projectile();
-      let p2 = Projectile();
+      let p1 = Spell();
+      let p2 = Spell();
+      game.onCast(p1, 1);
+      game.onCast(p2, 1);
       p1.x = p2.x = p0.x;
       p1.y = p2.y = p0.y;
       p1.vx = p2.vx = p0.vx;
@@ -218,9 +247,9 @@ export let Drunkard: Ritual = {
   },
 };
 
-export let SkeletalRiders: Ritual = {
+export let Riders: Ritual = {
   tags: NONE,
-  name: "Skeletal Riders",
+  name: "Riders",
   description: "Create a bone chariot each time you resurrect",
   onResurrect() {
     game.spawn(Chariot());
@@ -233,7 +262,7 @@ export let Pact: Ritual = {
   description: "Resurrections heal undead allies",
   onResurrect() {
     for (let object of game.objects) {
-      if (object.tags & UNDEAD) {
+      if (object.is(UNDEAD)) {
         Damage(object, object.hp - object.maxHp);
       }
     }
@@ -288,5 +317,29 @@ export let Triggerfinger: Ritual = {
   description: "Casts recharge 2x faster",
   onActive() {
     game.spell.castRechargeRate /= 2;
+  }
+};
+
+export let Bleed: Ritual = {
+  tags: CURSE,
+  name: "Bleed",
+  description: "Inflicts bleed on targets",
+  onCast(spell: GameObject) {
+    spell.sprite = sprites.p_red_skull;
+    spell.emitter!.extend({
+      variants: [
+        [sprites.p_red_3, sprites.p_red_2, sprites.p_red_1],
+        [sprites.p_red_4, sprites.p_red_3, sprites.p_red_2],
+        [sprites.p_red_3, sprites.p_red_2, sprites.p_red_1],
+      ],
+      frequency: 5,
+      angle: [DEG_180, 0],
+      mass: [20, 50],
+    });
+    let inflictBleed = new Behaviour(spell);
+    inflictBleed.onCollision = target => {
+      target.addBehaviour(new Bleeding(target));
+    };
+    spell.addBehaviour(inflictBleed);
   }
 };

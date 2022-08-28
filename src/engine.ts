@@ -35,8 +35,8 @@ export function clear() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
-export function drawSprite([sx, sy, sw, sh]: number[], x: number, y: number) {
-  ctx.drawImage(spritesImage, sx, sy, sw, sh, x | 0, y | 0, sw, sh);
+export function drawSprite([sx, sy, sw, sh]: Sprite, x: number, y: number) {
+  drawSpriteSlice(sx, sy, sw, sh, x, y, sw, sh);
 }
 
 /**
@@ -47,12 +47,12 @@ export function drawSprite([sx, sy, sw, sh]: number[], x: number, y: number) {
  * @param x
  * @param y
  */
-export function drawSceneSprite(sprite: number[], x: number, y: number) {
+export function drawSceneSprite(sprite: Sprite, x: number, y: number) {
   drawSprite(sprite, x, - y - sprite[3]);
 }
 
 export function drawSpriteSlice(sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number) {
-  ctx.drawImage(spritesImage, sx, sy, sw, sh, dx, dy, dw, dh);
+  ctx.drawImage(spritesImage, sx, sy, sw, sh, dx | 0, dy | 0, dw, dh);
 }
 
 export function drawNineSlice(sprite: Sprite, x: number, y: number, w: number, h: number) {
@@ -97,29 +97,32 @@ export function drawNineSlice(sprite: Sprite, x: number, y: number, w: number, h
   drawSpriteSlice(sx2, sy2, sw1, sh1, dx2, dy2, dw1, dh1); // Center
 }
 
+let textX = 0;
+let textY = 0;
+
 /**
  * Write a string of text from the pixel font onto the screen.
- * @param text 
- * @param x 
- * @param y 
+ * @param text
+ * @param x
+ * @param y
  */
-export function write(text: string, x: number, y: number) {
-  let currentX = x | 0;
-  let currentY = y | 0;
+export function write(text: string, x: number = textX, y: number = textY) {
+  textX = x | 0;
+  textY = y | 0;
   for (let i = 0; i < text.length; i++) {
     let char = text[i];
     if (char === "\n") {
-      currentX = x;
-      currentY += lineHeight;
-      continue;
+      textX = x;
+      textY += lineHeight;
+    } else {
+      let code = char.charCodeAt(0);
+      let sx = (code % 16) * glyphWidth;
+      let sy = (code / 16 | 0) * glyphHeight;
+      let dx = textX;
+      let dy = textY;
+      ctx.drawImage(fontImage, sx, sy, glyphWidth, glyphHeight, dx, dy, glyphWidth, glyphHeight);
+      textX += metrics[char] ?? glyphWidth;
     }
-    let code = char.charCodeAt(0);
-    let sx = (code % 16) * glyphWidth;
-    let sy = (code / 16 | 0) * glyphHeight;
-    let dx = currentX;
-    let dy = currentY;
-    ctx.drawImage(fontImage, sx, sy, glyphWidth, glyphHeight, dx, dy, glyphWidth, glyphHeight);
-    currentX += metrics[char] ?? glyphWidth;
   }
 }
 
@@ -139,9 +142,8 @@ export function init(width: number, height: number, update: (dt: number) => void
   let t0 = 0;
   (function loop(t1 = 0) {
     requestAnimationFrame(loop);
-    let dt = t1 - t0;
+    update(t1 - t0);
     t0 = t1;
-    update(dt);
   })();
 }
 
@@ -231,7 +233,6 @@ export class ParticleEmitter {
   mass: Range = defaultRange;
 
   private clock = 0;
-  private active = false;
   private done = false;
 
   constructor(props: Partial<ParticleEmitter> = {}) {
@@ -239,39 +240,21 @@ export class ParticleEmitter {
     particleEmitters.push(this);
   }
 
-  clone(): ParticleEmitter {
-    return Object.assign(new ParticleEmitter, this, {
-      particles: new Set(),
-    });
-  }
-
   extend(options: Partial<ParticleEmitter>) {
     return Object.assign(this, options);
   }
 
-  start() {
-    this.active = true;
-    return this;
-  }
-
-  stop() {
-    this.active = false;
-  }
-
   remove() {
-    this.active = false;
     this.done = true;
   }
 
   update(dt: number) {
     let t = dt / 1000;
 
-    if (this.active) {
-      this.clock += this.frequency;
-      while (this.clock > 0) {
-        this.clock -= 1;
-        this.emit();
-      }
+    this.clock += this.frequency;
+    while (!this.done && this.clock > 0) {
+      this.clock -= 1;
+      this.emit();
     }
 
     for (let p of this.particles) {

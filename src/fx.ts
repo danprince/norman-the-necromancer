@@ -30,7 +30,7 @@ export function particles() {
     variants: [
       [sprites.p_green_1, sprites.p_green_2, sprites.p_green_3],
       [sprites.p_green_2, sprites.p_green_3, sprites.p_green_4],
-      [sprites.p_green_1, sprites.p_green_3, sprites.p_green_5],
+      [sprites.p_green_1, sprites.p_green_2, sprites.p_green_3],
     ],
   });
 }
@@ -45,16 +45,5 @@ export function cloud(area: Rectangle, variants: Sprite[][]) {
     frequency: 2,
     mass: [-2, 0],
     variants,
-  });
-}
-
-export function dust(area: Rectangle) {
-  return cloud(area, [
-    [sprites.p_smoke_1, sprites.p_smoke_2, sprites.p_smoke_3],
-    [sprites.p_smoke_4, sprites.p_smoke_5, sprites.p_smoke_6],
-  ]).extend({
-    angle: [1.6, -0.4],
-    velocity: [4, 10],
-    mass: [0, 0],
   });
 }
