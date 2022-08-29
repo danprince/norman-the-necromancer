@@ -41,6 +41,7 @@ export class GameObject {
   hp = 0;
   maxHp = 0;
   despawnOnCollision = false;
+  despawnOnBounce = false;
   souls = 0;
 
   // Behaviours
@@ -116,6 +117,10 @@ export class GameObject {
   onBounce() {
     for (let behaviour of this.behaviours) {
       behaviour.onBounce();
+    }
+
+    if (this.despawnOnBounce) {
+      game.despawn(this);
     }
   }
 

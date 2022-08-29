@@ -45,7 +45,7 @@ export function Spell() {
   object.bounce = 0;
   object.friction = 0.1;
   object.despawnOnCollision = true;
-  object.addBehaviour(new DespawnTimer(object, 3000));
+  object.despawnOnBounce = true;
   object.addBehaviour(new Damaging(object));
   return object;
 }

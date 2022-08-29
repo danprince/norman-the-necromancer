@@ -1,5 +1,5 @@
 import { Damage } from "./actions";
-import { Bleeding, Damaging, Seeking } from "./behaviours";
+import { Bleeding, Damaging, DespawnTimer, Seeking } from "./behaviours";
 import { tween } from "./engine";
 import * as fx from "./fx";
 import * as sprites from "./sprites.json";
@@ -60,8 +60,10 @@ export let Bouncing: Ritual = {
   tags: BOUNCING,
   name: "Bouncing",
   description: "Spells bounce",
-  onCast(projectile) {
-    projectile.bounce = 0.5;
+  onCast(spell) {
+    spell.addBehaviour(new DespawnTimer(spell, 3000));
+    spell.despawnOnBounce = false;
+    spell.bounce = 0.5;
   },
 };
 
