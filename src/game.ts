@@ -41,6 +41,7 @@ export class GameObject {
   hp = 0;
   maxHp = 0;
   despawnOnCollision = false;
+  souls = 0;
 
   // Behaviours
   behaviours: Behaviour[] = [];
@@ -138,7 +139,7 @@ export class Behaviour {
   onUpdate(): boolean | void {}
   onBounce() {}
   onDamage(damage: Damage) {}
-  onDeath() {}
+  onDeath(death: Death) {}
   onFrame(dt: number) {}
   onCollision(target: GameObject) {}
 }
@@ -146,6 +147,11 @@ export class Behaviour {
 export interface Damage {
   amount: number;
   dealer: GameObject | undefined;
+}
+
+export interface Death {
+  object: GameObject;
+  souls: number;
 }
 
 interface Stage {
@@ -184,7 +190,28 @@ export interface Ritual {
   onActive?(): void;
   onCast?(spell: GameObject): void;
   onResurrect?(): void;
-  onDeath?(object: GameObject): void;
+  onDeath?(death: Death): void;
+}
+
+export const PLAYING = 0;
+export const SHOPPING = 1;
+export type State = typeof PLAYING | typeof SHOPPING;
+
+
+export interface ShopItem {
+  cost: number;
+  name: string;
+  description: string;
+  purchase(): void;
+}
+
+export function ShopItem(
+  cost: number,
+  name: string,
+  description: string,
+  purchase: () => void,
+): ShopItem {
+  return { cost, name, description, purchase };
 }
 
 export class Game {
@@ -192,6 +219,8 @@ export class Game {
   objects: GameObject[] = [];
   player: GameObject = undefined!;
   rituals: Ritual[] = [];
+  state: State = PLAYING;
+  souls: number = 100;
 
   spell: Spell = {
     targetAngle: 0,

@@ -271,7 +271,7 @@ export let Pact: Ritual = {
 
 export let Seance: Ritual = {
   tags: NONE,
-  name: "Séance",
+  name: "Seance",
   description: "Your spells pass through the undead",
   onCast(spell) {
     spell.collisionMask = LIVING;
@@ -299,15 +299,6 @@ export let Meteoric: Ritual = {
     object.x = Math.random() * game.stage.width;
     object.y = game.stage.ceiling;
     game.spawn(object);
-  }
-};
-
-export let Pentacaster: Ritual = {
-  tags: MAX_CASTS,
-  name: "Pentacaster",
-  description: "5x casts",
-  onActive() {
-    game.spell.maxCasts = 5;
   }
 };
 

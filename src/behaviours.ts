@@ -2,7 +2,7 @@ import * as fx from "./fx";
 import * as sprites from "./sprites.json";
 import { Damage } from "./actions";
 import { tween } from "./engine";
-import { Behaviour, Game, GameObject } from "./game";
+import { Behaviour, GameObject } from "./game";
 import { screenshake } from "./renderer";
 import type { Damage as Dmg } from "./game";
 import { distance, vectorToAngle, angleBetweenPoints, vectorFromAngle } from "./helpers";

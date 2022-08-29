@@ -84,3 +84,15 @@ export function randomFloat(max: number = 1): number {
 export function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+export function shuffled<T>(array: T[]): T[] {
+  array = [...array];
+  let m = array.length;
+
+  while (m) {
+    let i = randomInt(m--);
+    [array[m], array[i]] = [array[i], array[m]];
+  }
+
+  return array;
+}

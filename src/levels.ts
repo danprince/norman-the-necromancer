@@ -12,7 +12,8 @@ import {
   Villager,
   Wizard,
 } from "./objects";
-import { randomInt } from "./helpers"; import { GameObject } from "./game";
+import { randomInt } from "./helpers";
+import { GameObject } from "./game";
 
 // Signals (positive signals are spawn counters)
 const END_OF_LEVEL = 99;
@@ -80,6 +81,7 @@ const LEVELS = [
   10, RAT, 1, PIPER, END_OF_LEVEL,
 
   // Level 6
+  1, RAGE_KNIGHT, END_OF_WAVE,
   3, WIZARD, END_OF_LEVEL,
 
   // Level 7 - Angry Mob
@@ -105,11 +107,17 @@ const LEVELS = [
 let timer = 0;
 let cursor = 0;
 
+export function isLevelFinished() {
+  return LEVELS[cursor] === END_OF_LEVEL && isCleared();
+}
+
+export let nextLevel = () => cursor++;
+
 export function updateLevel(dt: number) {
   let cmd = LEVELS[cursor];
   if ((timer -= dt) > 0) {}
   else if (cmd === END_OF_WAVE) isCleared() && cursor++;
-  else if (cmd === END_OF_LEVEL) isCleared() && cursor++;
+  else if (cmd === END_OF_LEVEL) {}
   else if (cmd) {
     LEVELS[cursor]--; // Decrement quantity
     let id = LEVELS[cursor + 1];

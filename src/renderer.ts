@@ -1,6 +1,13 @@
 import * as sprites from "./sprites.json";
 import { canvas, clear, ctx, drawSceneSprite, drawSprite, particleEmitters, Sprite, write } from "./engine";
 import { Point, randomInt } from "./helpers";
+import { SHOPPING } from "./game";
+import { shop } from "./shop";
+
+const ICON_SOULS = "\x01";
+const ICON_HEALTH = "\x03";
+const ICON_CASTS = "\x04";
+const ICON_ARROW_RIGHT = "\x9D";
 
 let screenShakeTimer = 0;
 
@@ -34,6 +41,29 @@ export function render(dt: number) {
   ctx.restore();
 
   drawHud();
+
+  if (game.state === SHOPPING) {
+    drawShop();
+  }
+}
+
+function drawShop() {
+  ctx.save();
+  ctx.translate(100, 20);
+  write("Necronomicon\n", 0, 0);
+  write("~~-~--~~~-~~\n");
+  let selected = shop.items[shop.selectedIndex];
+  for (let item of shop.items) {
+    write(
+      `${item === selected ? ICON_ARROW_RIGHT : " "} ${
+        item.name
+      } ${ICON_SOULS}${item.cost}\n`,
+    );
+  }
+  write("~~-~--~~~-~~\n");
+  write(selected?.description + "\n");
+  write("~~-~--~~~-~~\n");
+  ctx.restore();
 }
 
 function drawHud() {
@@ -49,16 +79,7 @@ function drawHud() {
     drawSprite(sprite, 11 + i * 4, 6);
   }
 
-  //ctx.save();
-  //let width = 82;
-  //let filled = 1 - clamp(game.ability.timer / game.ability.cooldown, 0, 1);
-  //ctx.translate(200, 0);
-  //ctx.fillStyle = "#174a3e";
-  //ctx.fillRect(1, 1, filled * width | 0, 10);
-  //drawNineSlice(sprites.frame_grey, 0, 0, width, 11);
-  //drawSprite(sprites.p_skull, 3, 4);
-  //write(`Resurrect (SPC)`, 9, 3);
-  //ctx.restore();
+  write(`${ICON_SOULS}${game.souls}`, 0, 13);
 }
 
 function drawOrbs(

@@ -1,6 +1,6 @@
 import * as sprites from "./sprites.json";
 import * as fx from "./fx";
-import { Damage, GameObject } from "./game";
+import { Damage, Death, GameObject } from "./game";
 import { clamp, randomFloat, randomInt, vectorFromAngle } from "./helpers";
 import { Chariot, Corpse, Spell, Skeleton, SkeletonLord } from "./objects";
 import { CORPSE, LIVING, MOBILE } from "./tags";
@@ -17,10 +17,16 @@ export function Damage(
 }
 
 export function Die(object: GameObject) {
+  let death: Death = {
+    object,
+    souls: object.souls,
+  };
+
   game.despawn(object);
 
   if (object.is(MOBILE)) {
     let center = object.center();
+
     fx
       .bones()
       .extend(center)
@@ -32,8 +38,10 @@ export function Die(object: GameObject) {
     }
 
     for (let ritual of game.rituals) {
-      ritual.onDeath?.(object);
+      ritual.onDeath?.(death);
     }
+
+    game.souls += death.souls;
   }
 }
 

@@ -87,6 +87,7 @@ export function Villager() {
   unit.hp = unit.maxHp = 1;
   unit.updateSpeed = 600;
   unit.behaviours.push(new March(unit, -16));
+  unit.souls = 5;
   return unit;
 }
 
@@ -142,6 +143,7 @@ export function Champion() {
   unit.sprite = sprites.champion;
   unit.updateSpeed = 2000;
   unit.hp = unit.maxHp = 10;
+  unit.souls = 25;
   return unit;
 }
 
@@ -150,6 +152,7 @@ export function ShellKnight() {
   unit.sprite = sprites.shell_knight_up;
   unit.updateSpeed = 1000;
   unit.hp = unit.maxHp = 3;
+  unit.souls = 25;
 
   let shell = new Behaviour(unit);
   let shelled = false;
@@ -176,6 +179,7 @@ export function Monk() {
   unit.sprite = sprites.monk;
   unit.updateSpeed = 600;
   unit.hp = unit.maxHp = 3;
+  unit.souls = 10;
 
   let heal = new Behaviour(unit);
   heal.turns = 5;
@@ -211,6 +215,7 @@ export function Piper() {
   unit.updateSpeed = 500;
   unit.hp = unit.maxHp = 10;
   unit.addBehaviour(new Summon(unit, Rat, 1250));
+  unit.souls = 200;
   return unit;
 }
 
@@ -218,6 +223,7 @@ export function Rat() {
   let unit = Villager();
   unit.sprite = sprites.rat;
   unit.updateSpeed = 200;
+  unit.souls = 1;
   return unit;
 }
 
@@ -261,6 +267,7 @@ export function RageKnight() {
   unit.hp = unit.maxHp = 5;
   unit.addBehaviour(new Bleeding(unit));
   unit.addBehaviour(new Enraged(unit, SPELL));
+  unit.souls = 50;
   return unit;
 }
 
@@ -268,6 +275,7 @@ export function RoyalGuard() {
   let unit = Villager();
   unit.sprite = sprites.royal_guard;
   unit.hp = unit.maxHp = 5;
+  unit.souls = 20;
   return unit;
 }
 
@@ -275,6 +283,7 @@ export function Wizard() {
   let unit = Villager();
   unit.sprite = sprites.wizard;
   unit.hp = unit.maxHp = 3;
+  unit.souls = 30;
   return unit;
 }
 
@@ -282,5 +291,6 @@ export function Spearman() {
   let unit = Villager();
   unit.sprite = sprites.spearman;
   unit.hp = unit.maxHp = 2;
+  unit.souls = 10;
   return unit;
 }
