@@ -41,7 +41,7 @@ export function Spell() {
   object.tags = SPELL;
   object.collisionMask = MOBILE;
   object.mass = 100;
-  object.emitter = fx.particles();
+  object.emitter = fx.trail();
   object.bounce = 0;
   object.friction = 0.1;
   object.despawnOnCollision = true;

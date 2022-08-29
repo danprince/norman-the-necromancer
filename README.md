@@ -256,3 +256,7 @@ Wave ideas
   - Direct hit
   - Long shot
   - Power shot
+
+## Day 15
+- [x] Level definitions
+- [ ] Shop / level transitions

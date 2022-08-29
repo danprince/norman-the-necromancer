@@ -105,7 +105,7 @@ class ProjectileExplode extends Behaviour {
     }
 
     screenshake(50);
-    fx.particles()
+    fx.trail()
       .extend({
         ...spell.center(),
         velocity: [50, 100],

@@ -79,10 +79,8 @@ export function Resurrect() {
     ritual.onResurrect?.();
   }
 
-  let count = 0;
   for (let object of game.objects) {
     if (object.is(CORPSE)) {
-      count++;
       game.despawn(object);
       let unit = Skeleton(object.x, 0);
       fx.cloud(unit.bounds(), [

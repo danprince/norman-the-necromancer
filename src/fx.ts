@@ -18,7 +18,7 @@ export function bones() {
   });
 }
 
-export function particles() {
+export function trail() {
   return new ParticleEmitter({
     duration: [500, 1000],
     velocity: [1, 10],
