@@ -4,10 +4,7 @@ import { Point, randomInt } from "./helpers";
 import { SHOPPING } from "./game";
 import { shop } from "./shop";
 
-const ICON_SOULS = "\x01";
-const ICON_HEALTH = "\x03";
-const ICON_CASTS = "\x04";
-const ICON_ARROW_RIGHT = "\x9D";
+const ICON_SOULS = "$";
 
 let screenShakeTimer = 0;
 
@@ -48,22 +45,20 @@ export function render(dt: number) {
 }
 
 function drawShop() {
-  ctx.save();
-  ctx.translate(100, 20);
-  write("Necronomicon\n", 0, 0);
-  write("~~-~--~~~-~~\n");
+  write("~~-~--~~~-~~\n", 160, 20);
+  write("Necronomicon\n");
+  write("~~-~--~~~-~~\n\n");
   let selected = shop.items[shop.selectedIndex];
   for (let item of shop.items) {
     write(
-      `${item === selected ? ICON_ARROW_RIGHT : " "} ${
+      `${item === selected ? ">" : " "}${
         item.name
-      } ${ICON_SOULS}${item.cost}\n`,
+      } $${item.cost}\n`,
     );
   }
-  write("~~-~--~~~-~~\n");
+  write("\n~~-~--~~~-~~\n");
   write(selected?.description + "\n");
   write("~~-~--~~~-~~\n");
-  ctx.restore();
 }
 
 function drawHud() {
@@ -79,7 +74,18 @@ function drawHud() {
     drawSprite(sprite, 11 + i * 4, 6);
   }
 
-  write(`${ICON_SOULS}${game.souls}`, 0, 13);
+  write(`${ICON_SOULS}${game.souls}`, canvas.width / 2 - 30, 0);
+
+  let timer = game.ability.timer / 1000 | 0;
+  let cooldown = game.ability.cooldown / 1000 | 0;
+  let x = canvas.width - cooldown * 4 - 5;
+
+  for (let i = 0; i < cooldown; i++) {
+    let sprite = i < timer ? sprites.white_orb : sprites.white_orb_empty;
+    drawSprite(sprite, x + i * 4, 0);
+  }
+
+  write("Resurrect", x - 3, 6);
 }
 
 function drawOrbs(
@@ -108,6 +114,14 @@ function drawObjects() {
     } else {
       drawSceneSprite(sprites.health_orb, object.x, -10);
       write(`${object.hp}/${object.maxHp}`, object.x + 6, 4);
+    }
+
+    let { x } = object;
+    for (let behaviour of object.behaviours) {
+      if (behaviour.sprite) {
+        drawSceneSprite(behaviour.sprite, x, -16);
+        x += behaviour.sprite[2] + 1;
+      }
     }
   }
 }

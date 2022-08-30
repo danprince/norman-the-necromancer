@@ -1,13 +1,13 @@
-import { Damage } from "./actions";
-import { Bleeding, Damaging, DespawnTimer, Seeking } from "./behaviours";
-import { tween } from "./engine";
 import * as fx from "./fx";
 import * as sprites from "./sprites.json";
-import { Behaviour, Game, GameObject, Ritual } from "./game";
-import { angleBetweenPoints, clamp, DEG_180, DEG_360, distance, randomInt, vectorFromAngle, vectorToAngle } from "./helpers";
+import { Damage } from "./actions";
+import { Bleeding, Damaging, DespawnTimer, Doomed, Seeking } from "./behaviours";
+import { tween } from "./engine";
+import { Behaviour, GameObject, Ritual } from "./game";
+import { DEG_180, DEG_360, DEG_90, distance, randomInt } from "./helpers";
 import { Chariot, Spell, WardStone } from "./objects";
 import { screenshake } from "./renderer";
-import { LIVING, MOBILE, UNDEAD } from "./tags";
+import { LIVING, UNDEAD } from "./tags";
 
 /*
 - Every nth shot
@@ -124,7 +124,6 @@ export let Explosive: Ritual = {
   exclusiveTags: BOUNCING,
   name: "Explosive",
   description: "Spells explode on impact",
-  depth: Infinity,
   onCast(projectile) {
     projectile.addBehaviour(new ProjectileExplode(projectile));
   },
@@ -172,7 +171,9 @@ export let Piercing: Ritual = {
 
 class KnockbackSpell extends Behaviour {
   onCollision(target: GameObject): void {
-    tween(target.x, target.x + 16, 200, x => target.x = x);
+    if (target.mass < 1000) {
+      tween(target.x, target.x + 16, 200, x => target.x = x);
+    }
     //target.addBehaviour(new Stunned(target));
 
     // Knock objects backwards
@@ -214,8 +215,8 @@ class RainSpell extends Behaviour {
       let p0 = this.object;
       let p1 = Spell();
       let p2 = Spell();
-      game.onCast(p1, 1);
-      game.onCast(p2, 1);
+      game.onCast(p1, true);
+      game.onCast(p2, true);
       p1.x = p2.x = p0.x;
       p1.y = p2.y = p0.y;
       p1.vx = p2.vx = p0.vx;
@@ -233,6 +234,7 @@ export let Rain: Ritual = {
   exclusiveTags: SPLITTING,
   name: "Rain",
   description: "Spells split when they start to drop",
+  recursive: false,
   onCast(spell) {
     spell.addBehaviour(new RainSpell(spell));
   },
@@ -329,10 +331,32 @@ export let Bleed: Ritual = {
       angle: [DEG_180, 0],
       mass: [20, 50],
     });
-    let inflictBleed = new Behaviour(spell);
-    inflictBleed.onCollision = target => {
+    let inflict = spell.addBehaviour();
+    inflict.onCollision = target => {
       target.addBehaviour(new Bleeding(target));
     };
-    spell.addBehaviour(inflictBleed);
+  }
+};
+
+export let Doom: Ritual = {
+  tags: CURSE,
+  name: "Doom",
+  description: "Doomed targets always leave corpses",
+  onCast(spell: GameObject) {
+    spell.sprite = sprites.p_skull;
+    spell.emitter!.extend({
+      variants: [
+        [sprites.p_purple_1, sprites.p_purple_2, sprites.p_purple_3],
+        [sprites.p_purple_2, sprites.p_purple_3, sprites.p_purple_4],
+        [sprites.p_purple_1, sprites.p_purple_2, sprites.p_purple_3],
+      ],
+      frequency: 2,
+      angle: [DEG_90, 0],
+      mass: [-10, -20],
+    });
+    let inflict = spell.addBehaviour();
+    inflict.onCollision = target => {
+      target.addBehaviour(new Doomed(target));
+    };
   }
 };

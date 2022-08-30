@@ -2,8 +2,8 @@ import * as sprites from "./sprites.json";
 import * as fx from "./fx";
 import { Behaviour, GameObject } from "./game";
 import { BARRIER, CORPSE, LIVING, SPELL, MOBILE, PLAYER, UNDEAD } from "./tags";
-import { DEG_90, randomElement, randomInt } from "./helpers";
-import { March, Attack, DespawnTimer, Damaging, Bleeding, Enraged, Summon } from "./behaviours";
+import { DEG_90, randomElement } from "./helpers";
+import { March, Attack, Damaging, Bleeding, Enraged, Summon } from "./behaviours";
 import { Damage, Die } from "./actions";
 import { tween } from "./engine";
 
@@ -86,7 +86,8 @@ export function Villager() {
   unit.tags = LIVING | MOBILE;
   unit.hp = unit.maxHp = 1;
   unit.updateSpeed = 600;
-  unit.behaviours.push(new March(unit, -16));
+  unit.addBehaviour(new March(unit, -16));
+  unit.corpseChance = 0.5;
   unit.souls = 5;
   return unit;
 }
@@ -95,7 +96,7 @@ export function TheKing() {
   let unit = Villager();
   unit.sprite = sprites.the_king;
   unit.updateSpeed = 5000;
-  unit.hp = unit.maxHp = 20;
+  unit.hp = unit.maxHp = 100;
   unit.behaviours = [];
   unit.mass = 1000;
 
@@ -151,25 +152,20 @@ export function ShellKnight() {
   let unit = Villager();
   unit.sprite = sprites.shell_knight_up;
   unit.updateSpeed = 1000;
-  unit.hp = unit.maxHp = 3;
+  unit.hp = unit.maxHp = 5;
   unit.souls = 25;
 
-  let shell = new Behaviour(unit);
+  let shell = unit.addBehaviour();
   let shelled = false;
   let timer = 0;
 
   shell.onUpdate = () => {
-    shelled = timer++ % 3 > 0;
+    shelled = timer++ % 4 > 1;
     unit.sprite = shelled ? sprites.shell_knight_down : sprites.shell_knight_up;
+    shell.sprite = shelled ? sprites.status_shielded : undefined;
   };
 
-  shell.onDamage = dmg => {
-    if (shelled && dmg.amount > 0) {
-      dmg.amount = 0;
-    }
-  };
-
-  unit.addBehaviour(shell);
+  shell.onDamage = (dmg) => dmg.amount = Math.max(0, dmg.amount);
 
   return unit;
 }
@@ -243,7 +239,7 @@ export function WardStone() {
 
 export function Chariot() {
   let unit = new GameObject();
-  unit.sprite = sprites.chariot;
+  //unit.sprite = sprites.chariot;
   unit.tags = UNDEAD | MOBILE;
   unit.collisionMask = LIVING;
   unit.hp = unit.maxHp = 20;
@@ -284,13 +280,5 @@ export function Wizard() {
   unit.sprite = sprites.wizard;
   unit.hp = unit.maxHp = 3;
   unit.souls = 30;
-  return unit;
-}
-
-export function Spearman() {
-  let unit = Villager();
-  unit.sprite = sprites.spearman;
-  unit.hp = unit.maxHp = 2;
-  unit.souls = 10;
   return unit;
 }

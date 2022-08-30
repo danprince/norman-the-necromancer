@@ -2,7 +2,7 @@ import * as sprites from "./sprites.json";
 import * as fx from "./fx";
 import { Damage, Death, GameObject } from "./game";
 import { clamp, randomFloat, randomInt, vectorFromAngle } from "./helpers";
-import { Chariot, Corpse, Spell, Skeleton, SkeletonLord } from "./objects";
+import { Corpse, Spell, Skeleton } from "./objects";
 import { CORPSE, LIVING, MOBILE } from "./tags";
 
 export function Damage(
@@ -13,16 +13,15 @@ export function Damage(
   let damage: Damage = { amount, dealer };
   object.onDamage(damage);
   object.hp = clamp(object.hp - damage.amount, 0, object.maxHp);
-  if (!object.hp) Die(object);
+  if (!object.hp) Die(object, dealer);
 }
 
-export function Die(object: GameObject) {
+export function Die(object: GameObject, killer?: GameObject) {
   let death: Death = {
     object,
+    killer,
     souls: object.souls,
   };
-
-  game.despawn(object);
 
   if (object.is(MOBILE)) {
     let center = object.center();
@@ -33,16 +32,20 @@ export function Die(object: GameObject) {
       .burst(2 + randomInt(3))
       .remove();
 
-    if (object.is(LIVING) && randomFloat() > 0.75) {
-      game.spawn(Corpse(center.x, center.y));
-    }
+    object.onDeath(death);
 
     for (let ritual of game.rituals) {
       ritual.onDeath?.(death);
     }
 
+    if (object.is(LIVING) && randomFloat() <= object.corpseChance) {
+      game.spawn(Corpse(center.x, center.y));
+    }
+
     game.souls += death.souls;
   }
+
+  game.despawn(object);
 }
 
 let castAnimationTimeout = 0;
@@ -77,11 +80,11 @@ export function Cast() {
 }
 
 export function Resurrect() {
-  if (game.ability.timer > 0) {
+  if (game.ability.timer < game.ability.cooldown) {
     return;
   }
 
-  game.ability.timer = game.ability.cooldown;
+  game.ability.timer = 0;
 
   for (let ritual of game.rituals) {
     ritual.onResurrect?.();

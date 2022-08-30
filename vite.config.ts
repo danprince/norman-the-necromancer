@@ -1,6 +1,7 @@
-import { defineConfig } from "vite";
+import { defineConfig, Plugin } from "vite";
 
 export default defineConfig({
+  plugins: [singleFile()],
   build: {
     polyfillModulePreload: false,
     reportCompressedSize: false,
@@ -27,3 +28,23 @@ export default defineConfig({
     },
   },
 });
+
+function singleFile(): Plugin {
+  return {
+    name: "vite:single-file",
+    enforce: "post",
+    generateBundle(options, bundle) {
+      let html = bundle["index.html"] as any;
+      let js = bundle["index.js"] as any;
+
+      if (html.type === "asset") {
+        html.source = html.source
+          .replace(/<script.*<\/script>/, "")
+          .replace("</body>", () => `<script>${js.code}</script>`)
+          .replace(/\n+/g, "");
+      }
+
+      delete bundle[js.fileName];
+    }
+  };
+}

@@ -2,7 +2,7 @@ import * as fx from "./fx";
 import * as sprites from "./sprites.json";
 import { Damage } from "./actions";
 import { tween } from "./engine";
-import { Behaviour, GameObject } from "./game";
+import { Behaviour, Death, GameObject } from "./game";
 import { screenshake } from "./renderer";
 import type { Damage as Dmg } from "./game";
 import { distance, vectorToAngle, angleBetweenPoints, vectorFromAngle } from "./helpers";
@@ -64,7 +64,9 @@ export class Damaging extends Behaviour {
 }
 
 export class Bleeding extends Behaviour {
+  override sprite = sprites.status_bleeding;
   override turns = 3;
+  amount = 1;
 
   emitter = fx.cloud({ x: 0, y: 0, w: 0, h: 0 }, [
     [sprites.health_orb, sprites.health_pip],
@@ -82,7 +84,31 @@ export class Bleeding extends Behaviour {
   }
 }
 
+export class Doomed extends Behaviour {
+  override sprite = sprites.status_doomed;
+  override turns = 1;
+
+  emitter = fx.cloud({ x: 0, y: 0, w: 0, h: 0 }, [
+    [sprites.p_purple_3, sprites.p_purple_2, sprites.p_purple_1],
+    [sprites.p_purple_4, sprites.p_purple_3, sprites.p_purple_2],
+    [sprites.p_purple_3, sprites.p_purple_2, sprites.p_purple_1],
+  ]).extend({
+    mass: [-10, -30],
+    frequency: 0,
+  });
+
+  override onDeath(death: Death) {
+    death.object.corpseChance &&= 1;
+  }
+
+  override onUpdate(): boolean | void {
+    this.emitter.extend(this.object.bounds()).burst(10);
+  }
+}
+
 export class Enraged extends Behaviour {
+  override sprite = sprites.status_enraged;
+
   emitter = fx.cloud({ x: 0, y: 0, w: 0, h: 0 }, [
     [sprites.health_orb, sprites.health_pip],
     [sprites.health_pip]

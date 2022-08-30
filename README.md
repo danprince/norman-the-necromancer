@@ -260,3 +260,16 @@ Wave ideas
 ## Day 15
 - [x] Level definitions
 - [ ] Shop / level transitions
+
+## Day 16
+- [x] Shop (rough UI)
+- [ ] Resurrections timer UI
+- [ ] ~~Soul bonuses~~
+- [ ] Ritual rarity
+- [ ] End game
+- [ ] Revisit rituals
+- [ ] Status icons for shelled/enraged
+- [ ] Design some better intro waves
+- [ ] Show wave progress (people got confused about the end)
+- [ ] Behaviour stacking IDs (stacking for anonymous behaviours)
+- [ ] Figure out a better API for defining/composing rituals

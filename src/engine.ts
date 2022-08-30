@@ -1,5 +1,4 @@
 import spriteSrc from "./sprites.png";
-import fontSrc from "./font.png";
 import { glyphWidth, glyphHeight, glyphWidthOverrides, lineHeight } from "./font.json";
 import { clamp, removeFromArray, vectorFromAngle } from "./helpers";
 
@@ -20,9 +19,6 @@ for (let k in glyphWidthOverrides) {
     metrics[c] = glyphWidthOverrides[k as keyof typeof glyphWidthOverrides];
   }
 }
-
-let fontImage = new Image();
-fontImage.src = fontSrc;
 
 let spritesImage = new Image();
 spritesImage.src = spriteSrc;
@@ -115,12 +111,12 @@ export function write(text: string, x: number = textX, y: number = textY) {
       textX = x;
       textY += lineHeight;
     } else {
-      let code = char.charCodeAt(0);
-      let sx = (code % 16) * glyphWidth;
-      let sy = (code / 16 | 0) * glyphHeight;
+      let code = char.charCodeAt(0) - 32;
+      let sx = (code % 32) * glyphWidth;
+      let sy = (code / 32 | 0) * glyphHeight;
       let dx = textX;
       let dy = textY;
-      ctx.drawImage(fontImage, sx, sy, glyphWidth, glyphHeight, dx, dy, glyphWidth, glyphHeight);
+      ctx.drawImage(spritesImage, sx, sy, glyphWidth, glyphHeight, dx, dy, glyphWidth, glyphHeight);
       textX += metrics[char] ?? glyphWidth;
     }
   }

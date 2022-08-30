@@ -6,7 +6,7 @@
     "build": "tsc && vite build && yarn archive",
     "build:full": "tsc && vite build && yarn squash && yarn archive",
     "squash": "tinypng dist/",
-    "archive": "zip dist.zip -r dist/* && ./scripts/measure.sh dist.zip",
+    "archive": "zip -9 dist.zip -r dist/* && ./scripts/measure.sh dist.zip",
     "typecheck": "tsc",
     "preview": "vite preview"
   },

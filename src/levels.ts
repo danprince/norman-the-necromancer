@@ -57,6 +57,8 @@ const DELAYS: Record<string | number, () => number> = {
 };
 
 const LEVELS = [
+  END_OF_LEVEL,
+
   // Level 1
   4, VILLAGER, END_OF_WAVE,
   2, VILLAGER, 1, ARCHER, 4, VILLAGER, END_OF_WAVE,

@@ -5,12 +5,18 @@ import { Cast, Damage, Resurrect } from "./actions";
 import { angleBetweenPoints } from "./helpers";
 import { Player } from "./objects";
 import { isLevelFinished, nextLevel, updateLevel } from "./levels";
-import { Bleed, Bouncing, Broken, Drunkard, Explosive, Homing, Knockback, Meteoric, Pact, Piercing, Rain, Riders, Seance, SplitOnBounce, Splitshot, Triggerfinger, Weightless } from "./rituals";
+import { Bleed, Bouncing, Broken, Doom, Drunkard, Explosive, Homing, Knockback, Meteoric, Pact, Piercing, Rain, Riders, Seance, SplitOnBounce, Splitshot, Triggerfinger, Weightless } from "./rituals";
 import { buy, createRitualItems, selectShopIndex, shop } from "./shop";
 
 let player = Player();
 let game = new Game(player);
 let paused = false;
+
+const ARROW_UP = 38;
+const ARROW_DOWN = 40;
+const SPACE = 32;
+const ENTER = 13;
+const KEY_P = 80;
 
 onpointerdown = () => {
   game.spell.castStartTime = Date.now();
@@ -28,14 +34,14 @@ onpointermove = ({ clientX, clientY }) => {
   game.spell.targetAngle = angleBetweenPoints(p1, p2);
 }
 
-onkeydown = ({ key }) => {
+onkeydown = ({ which: key }) => {
   if (game.state === PLAYING) {
-    if (key === " ") Resurrect();
-    if (key === "p") paused = !paused;
+    if (key === SPACE) Resurrect();
+    if (key === KEY_P) paused = !paused;
   } else {
-    if (key === "ArrowUp") selectShopIndex(-1);
-    if (key === "ArrowDown") selectShopIndex(+1);
-    if (key === "Enter" || key === " ") buy();
+    if (key === ARROW_UP) selectShopIndex(-1);
+    if (key === ARROW_DOWN) selectShopIndex(+1);
+    if (key === ENTER) buy();
   }
 }
 
@@ -55,9 +61,9 @@ function update(dt: number) {
 
 function restock() {
   shop.items = [
-    ShopItem(10, "+1 Casts  ", "Permanent +1\x04", () => game.spell.maxCasts++),
-    ShopItem(10, "+1 Health ", `Heal 1\x03`, () => Damage(game.player, -1)),
-    ShopItem(100, "+1 Max HP ", `Permanent +1\x03 `, () => {
+    ShopItem(10, "Charge", "+1\x7F max casts", () => game.spell.maxCasts++),
+    ShopItem(10, "Heal", `Heal 1*`, () => Damage(game.player, -1)),
+    ShopItem(100, "Revive", `+1* max hp`, () => {
       game.player.maxHp++;
       game.player.hp++;
     }),
@@ -68,6 +74,9 @@ function restock() {
     }),
   ];
 }
+
+game.addRitual(Doom);
+game.addRitual(Bleed);
 
 shop.rituals = [
   Explosive,
@@ -80,7 +89,6 @@ shop.rituals = [
   Piercing,
   Knockback,
   Drunkard,
-  Riders,
   Pact,
   Seance,
   Broken,
