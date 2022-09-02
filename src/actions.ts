@@ -39,7 +39,7 @@ export function Die(object: GameObject, killer?: GameObject) {
     }
 
     if (object.is(LIVING) && randomFloat() <= object.corpseChance) {
-      game.spawn(Corpse(center.x, center.y));
+      game.spawn(Corpse(), center.x, center.y);
     }
 
     game.souls += death.souls;
@@ -54,13 +54,13 @@ export function Cast() {
   let { spell, player } = game;
 
   if (spell.casts === 0) return;
-  spell.casts -= 1;
-
-  let power = spell.basePower + game.getCastingEnergy() * 100;
+  spell.casts--;
 
   player.sprite = sprites.norman_arms_up;
   clearTimeout(castAnimationTimeout);
   castAnimationTimeout = setTimeout(() => player.sprite = sprites.norman_arms_down, 500);
+
+  let power = spell.basePower + game.getCastingEnergy() * 100;
   let targetAngle = spell.targetAngle - (spell.shotsPerRound * spell.shotOffsetAngle / 2);
 
   for (let j = 0; j < spell.shotsPerRound; j++) {
@@ -93,13 +93,13 @@ export function Resurrect() {
   for (let object of game.objects) {
     if (object.is(CORPSE)) {
       game.despawn(object);
-      let unit = Skeleton(object.x, 0);
+      let unit = Skeleton();
       fx.cloud(unit.bounds(), [
         [sprites.p_green_1, sprites.p_green_2, sprites.p_green_3],
         [sprites.p_green_2, sprites.p_green_3, sprites.p_green_4],
         [sprites.p_green_1, sprites.p_green_3, sprites.p_green_5],
       ]).burst(10).remove();
-      game.spawn(unit);
+      game.spawn(unit, object.x, 0);
     }
   }
 }

@@ -1,12 +1,12 @@
 import { init, updateParticles, updateTweens } from "./engine";
-import { Game, PLAYING, ShopItem, SHOPPING } from "./game";
+import { Game, PLAYING, SHOPPING } from "./game";
 import { render, screenToSceneCoords } from "./renderer";
-import { Cast, Damage, Resurrect } from "./actions";
+import { Cast, Resurrect } from "./actions";
 import { angleBetweenPoints } from "./helpers";
 import { Player } from "./objects";
-import { isLevelFinished, nextLevel, updateLevel } from "./levels";
-import { Bleed, Bouncing, Broken, Doom, Drunkard, Explosive, Homing, Knockback, Meteoric, Pact, Piercing, Rain, Riders, Seance, SplitOnBounce, Splitshot, Triggerfinger, Weightless } from "./rituals";
-import { buy, createRitualItems, selectShopIndex, shop } from "./shop";
+import { isLevelFinished, updateLevel } from "./levels";
+import { Bleed, Bouncing, Broken, Ceiling, Drunkard, Explosive, Homing, Knockback, Meteoric, Pact, Piercing, Rain, Seance, SplitOnBounce, Splitshot, Triggerfinger, Weightless } from "./rituals";
+import { buy, restockShop, selectShopIndex, shop } from "./shop";
 
 let player = Player();
 let game = new Game(player);
@@ -55,30 +55,12 @@ function update(dt: number) {
 
   if (game.state === PLAYING && isLevelFinished()) {
     game.state = SHOPPING;
-    restock();
+    restockShop();
   }
 }
 
-function restock() {
-  shop.items = [
-    ShopItem(10, "Charge", "+1\x7F max casts", () => game.spell.maxCasts++),
-    ShopItem(10, "Heal", `Heal 1*`, () => Damage(game.player, -1)),
-    ShopItem(100, "Revive", `+1* max hp`, () => {
-      game.player.maxHp++;
-      game.player.hp++;
-    }),
-    ...createRitualItems(),
-    ShopItem(0, "Continue", "Begin the next level", () => {
-      game.state = PLAYING;
-      nextLevel();
-    }),
-  ];
-}
-
-game.addRitual(Doom);
-game.addRitual(Bleed);
-
 shop.rituals = [
+  Ceiling,
   Explosive,
   Rain,
   Bouncing,

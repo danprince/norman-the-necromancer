@@ -71,11 +71,9 @@ class ProjectileSplitOnBounce extends Behaviour {
   onBounce(): void {
     let p1 = this.object;
     let p2 = Spell();
-    p2.x = p1.x;
-    p2.y = p1.y;
     p2.vx = p1.vy;
     p2.vy = p1.vx * 2;
-    game.spawn(p2);
+    game.spawn(p2, p1.x, p1.y);
   }
 }
 
@@ -300,9 +298,9 @@ export let Meteoric: Ritual = {
   description: "Wardstones drop from above on resurrection",
   onResurrect() {
     let object = WardStone();
-    object.x = Math.random() * game.stage.width;
-    object.y = game.stage.ceiling;
-    game.spawn(object);
+    let x = Math.random() * game.stage.width;
+    let y = game.stage.ceiling;
+    game.spawn(object, x, y);
   }
 };
 

@@ -50,6 +50,10 @@ export class GameObject {
   updateSpeed = 0;
   updateClock = 0;
 
+  constructor(props: Partial<GameObject> = {}) {
+    Object.assign(this, props);
+  }
+
   is(mask: number): boolean {
     return (this.tags & mask) > 0;
   }
@@ -234,7 +238,8 @@ export class Game {
   player: GameObject = undefined!;
   rituals: Ritual[] = [];
   state: State = PLAYING;
-  souls: number = 100;
+  souls: number = 0;
+  streak: number = 0;
 
   spell: Spell = {
     targetAngle: 0,

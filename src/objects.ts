@@ -7,10 +7,8 @@ import { March, Attack, Damaging, Bleeding, Enraged, Summon } from "./behaviours
 import { Damage, Die } from "./actions";
 import { tween } from "./engine";
 
-export function Corpse(x: number, y: number) {
+export function Corpse() {
   let unit = new GameObject();
-  unit.x = x;
-  unit.y = y;
   unit.sprite = sprites.skull;
   unit.mass = 100;
   unit.tags = CORPSE;
@@ -50,11 +48,9 @@ export function Spell() {
   return object;
 }
 
-export function Skeleton(x: number, y: number) {
+export function Skeleton() {
   let unit = new GameObject();
   unit.sprite = sprites.skeleton;
-  unit.x = x;
-  unit.y = y;
   unit.tags = UNDEAD | MOBILE;
   unit.collisionMask = LIVING;
   unit.hp = unit.maxHp = 3;
@@ -64,8 +60,8 @@ export function Skeleton(x: number, y: number) {
   return unit;
 }
 
-export function SkeletonLord(x: number, y: number) {
-  let unit = Skeleton(x, y);
+export function SkeletonLord() {
+  let unit = Skeleton();
   unit.sprite = sprites.big_skeleton;
   unit.hp = unit.maxHp = 5;
   unit.updateSpeed = 3000;

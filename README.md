@@ -256,8 +256,6 @@ Wave ideas
   - Direct hit
   - Long shot
   - Power shot
-
-## Day 15
 - [x] Level definitions
 - [ ] Shop / level transitions
 
@@ -273,3 +271,14 @@ Wave ideas
 - [ ] Show wave progress (people got confused about the end)
 - [ ] Behaviour stacking IDs (stacking for anonymous behaviours)
 - [ ] Figure out a better API for defining/composing rituals
+
+## Day 18
+Got the game size back down to 80% of the budget by combining the spritesheet/font and inlining the JS into the index.html.
+- [ ] Experiment with rewriting classes as objects + functions
+  - [ ] Game class can probably all be module level variables
+  - [ ] Rituals as objects
+  - [ ] Behaviours as objects
+  - [ ] GameObject .extend method instead of unit.xyz = foo pattern
+
+## Day 20
+Should probably deduplicate some of the physics code between particles and game objects.
