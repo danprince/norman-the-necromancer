@@ -165,7 +165,11 @@ export function ShellKnight() {
     shell.sprite = shelled ? sprites.status_shielded : undefined;
   };
 
-  shell.onDamage = (dmg) => dmg.amount = Math.max(0, dmg.amount);
+  shell.onDamage = (dmg) => {
+    if (shelled) {
+      dmg.amount = Math.min(0, dmg.amount);
+    }
+  };
 
   return unit;
 }

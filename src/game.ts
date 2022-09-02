@@ -368,12 +368,10 @@ export class Game {
 
     // Collisions
     for (let object of this.objects) {
-      if (object.collisionMask) {
-        for (let target of this.objects) {
-          if (object.collisionMask & target.tags) {
-            if (overlaps(object.bounds(), target.bounds())) {
-              object.onCollision(target);
-            }
+      for (let target of this.objects) {
+        if (object.collisionMask & target.tags) {
+          if (overlaps(object.bounds(), target.bounds())) {
+            object.onCollision(target);
           }
         }
       }
@@ -382,9 +380,8 @@ export class Game {
 
   onCast(spell: GameObject, recursive = false) {
     for (let ritual of game.rituals) {
-      if (!recursive || ritual.recursive !== false) {
-        ritual.onCast?.(spell);
-      }
+      if (recursive && ritual.recursive != false) continue;
+      ritual.onCast?.(spell);
     }
   }
 
