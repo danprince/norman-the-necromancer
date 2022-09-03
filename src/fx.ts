@@ -47,3 +47,17 @@ export function cloud(area: Rectangle, variants: Sprite[][]) {
     variants,
   });
 }
+
+export function royalty() {
+  return trail().extend({
+    frequency: 0.5,
+    variants: [
+      [sprites.p_star_1, sprites.p_star_2, sprites.p_star_3],
+      [sprites.p_star_2, sprites.p_star_3, sprites.p_star_4],
+      [sprites.p_star_1, sprites.p_star_3],
+      [sprites.p_purple_1, sprites.p_purple_2, sprites.p_purple_3],
+      [sprites.p_purple_2, sprites.p_purple_3, sprites.p_purple_4],
+      [sprites.p_purple_1, sprites.p_purple_2, sprites.p_purple_3],
+    ],
+  });
+}

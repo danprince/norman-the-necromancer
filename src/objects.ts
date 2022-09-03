@@ -94,6 +94,12 @@ export function TheKing() {
   unit.hp = unit.maxHp = 100;
   unit.behaviours = [];
   unit.mass = 1000;
+  unit.emitter = fx.royalty().extend({
+    frequency: 0.2,
+    angle: [DEG_90, 0.5],
+    w: unit.sprite[2],
+    h: unit.sprite[3],
+  });
 
   let phase = 1
   let marching = new March(unit, -32);
