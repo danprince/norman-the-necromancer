@@ -2,7 +2,7 @@ import * as sprites from "./sprites.json";
 import * as fx from "./fx";
 import { Behaviour, GameObject } from "./game";
 import { BARRIER, CORPSE, LIVING, SPELL, MOBILE, PLAYER, UNDEAD } from "./tags";
-import { DEG_90, randomElement, randomInt } from "./helpers";
+import { DEG_90, randomElement } from "./helpers";
 import { March, Attack, Damaging, Bleeding, Enraged, Summon, Invulnerable } from "./behaviours";
 import { Damage, Die } from "./actions";
 import { tween } from "./engine";
@@ -52,7 +52,7 @@ export function Skeleton() {
   unit.sprite = sprites.skeleton;
   unit.tags = UNDEAD | MOBILE;
   unit.collisionMask = LIVING;
-  unit.hp = unit.maxHp = 3;
+  unit.hp = unit.maxHp = 1;
   unit.updateSpeed = 1000;
   unit.behaviours.push(new March(unit, 16));
   unit.behaviours.push(new Attack(unit, ))
@@ -84,6 +84,12 @@ export function Villager() {
   unit.addBehaviour(new March(unit, -16));
   unit.corpseChance = 0.5;
   unit.souls = 5;
+  return unit;
+}
+
+export function Bandit() {
+  let unit = Villager();
+  unit.hp = unit.maxHp = 2;
   return unit;
 }
 
@@ -130,7 +136,7 @@ export function TheKing() {
   };
 
   summons.onSummon = () => {
-    if (summons.summonCounter >= 10) {
+    if (summons.summonCounter >= 5) {
       phase = 3;
       unit.removeBehaviour(enraged);
       unit.removeBehaviour(invulnerable);
@@ -146,7 +152,7 @@ export function Champion() {
   let unit = Villager();
   unit.sprite = sprites.champion;
   unit.updateSpeed = 2000;
-  unit.hp = unit.maxHp = 10;
+  unit.hp = unit.maxHp = 20;
   unit.souls = 25;
   return unit;
 }
@@ -216,8 +222,8 @@ export function Piper() {
   let unit = Villager();
   unit.sprite = sprites.piper;
   unit.updateSpeed = 500;
-  unit.hp = unit.maxHp = 10;
-  unit.addBehaviour(new Summon(unit, Rat, 1250));
+  unit.hp = unit.maxHp = 25;
+  unit.addBehaviour(new Summon(unit, Rat, 1000));
   unit.souls = 200;
   return unit;
 }
@@ -278,8 +284,49 @@ export function RageKnight() {
 export function RoyalGuard() {
   let unit = Villager();
   unit.sprite = sprites.royal_guard;
-  unit.hp = unit.maxHp = 5;
+  unit.hp = unit.maxHp = 4;
   unit.souls = 20;
+  let march = unit.getBehaviour(March)!;
+
+  let shielded = false;
+  let shield = unit.addBehaviour();
+  shield.turns = 3;
+
+  shield.onUpdate = () => {
+    shielded = !shielded;
+    march.step = shielded ? 0 : -16;
+    unit.sprite = shielded ? sprites.royal_guard_shielded : sprites.royal_guard;
+  };
+
+  shield.onDamage = dmg => {
+    if (!shielded || !dmg.dealer?.is(SPELL)) return;
+
+    if (dmg.dealer.vx > 0) {
+      dmg.amount = 0;
+
+      let orb = RoyalGuardOrb();
+      orb.vx = dmg.dealer.vx *= -1;
+      orb.vy = dmg.dealer.vy *= -0.25;
+      orb.mass = dmg.dealer.mass;
+      game.spawn(orb, dmg.dealer.x - orb.sprite[2] - 1, dmg.dealer.y);
+    }
+  };
+
+  // Looks more natural if the shield comes up first
+  unit.behaviours.reverse();
+  return unit;
+}
+
+export function RoyalGuardOrb() {
+  let unit = new GameObject();
+  unit.sprite = sprites.yellow_orb;
+  unit.tags = LIVING;
+  unit.collisionMask = MOBILE | PLAYER;
+  unit.hp = 1;
+  unit.despawnOnBounce = true;
+  unit.despawnOnCollision = true;
+  unit.addBehaviour(new Damaging(unit));
+  unit.emitter = fx.royalty();
   return unit;
 }
 
