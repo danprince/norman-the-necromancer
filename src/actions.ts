@@ -61,7 +61,7 @@ export function Cast() {
   clearTimeout(castAnimationTimeout);
   castAnimationTimeout = setTimeout(() => player.sprite = sprites.norman_arms_down, 500);
 
-  let power = spell.basePower + game.getCastingEnergy() * 100;
+  let power = spell.basePower;
   let targetAngle = spell.targetAngle - (spell.shotsPerRound * spell.shotOffsetAngle / 2);
   let groupId = castGroupId++;
 
@@ -78,8 +78,6 @@ export function Cast() {
     game.spawn(projectile);
     game.onCast(projectile);
   }
-
-  spell.castStartTime = Infinity;
 }
 
 export function Resurrect() {

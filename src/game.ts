@@ -193,7 +193,6 @@ export interface Spell {
   casts: number;
   castRechargeRate: number;
   castRechargeTimer: number;
-  castStartTime: number;
 }
 
 export interface Ability {
@@ -247,14 +246,13 @@ export class Game {
   spell: Spell = {
     targetAngle: 0,
     targetRadius: 15,
-    basePower: 120,
+    basePower: 180,
     shotsPerRound: 1,
     shotOffsetAngle: 0.1,
     maxCasts: 3,
     casts: 3,
     castRechargeRate: 1000,
     castRechargeTimer: 0,
-    castStartTime: Infinity,
   };
 
   ability: Ability = {
@@ -409,10 +407,5 @@ export class Game {
       x: center.x + vx * spell.targetRadius,
       y: center.y + vy * spell.targetRadius,
     };
-  }
-
-  getCastingEnergy(): number {
-    let delta = Date.now() - this.spell.castStartTime;
-    return Math.min(delta / 1000, 1);
   }
 }

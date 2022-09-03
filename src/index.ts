@@ -18,10 +18,6 @@ const SPACE = 32;
 const ENTER = 13;
 const KEY_P = 80;
 
-onpointerdown = () => {
-  game.spell.castStartTime = Date.now();
-}
-
 onpointerup = () => {
   if (game.state === PLAYING) {
     Cast();
