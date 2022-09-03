@@ -394,7 +394,7 @@ export class Game {
 
   onCast(spell: GameObject, recursive = false) {
     for (let ritual of game.rituals) {
-      if (recursive && ritual.recursive != false) continue;
+      if (recursive && ritual.recursive == false) continue;
       ritual.onCast?.(spell);
     }
   }
