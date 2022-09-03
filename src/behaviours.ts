@@ -152,7 +152,7 @@ export class Seeking extends Behaviour {
 
     if (target) {
       let currentAngle = vectorToAngle(projectile.vx, projectile.vy);
-      let desiredAngle = angleBetweenPoints(projectile, target);
+      let desiredAngle = angleBetweenPoints(projectile, target.center());
       let angle = currentAngle + (desiredAngle - currentAngle) / 4;
       let magnitude = Math.hypot(projectile.vx, projectile.vy);
       let [vx, vy] = vectorFromAngle(angle);
