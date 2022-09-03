@@ -2,10 +2,10 @@ import * as fx from "./fx";
 import * as sprites from "./sprites.json";
 import { Damage } from "./actions";
 import { tween } from "./engine";
-import { Behaviour, Death, GameObject } from "./game";
+import { Behaviour, Death, GameObject, MAX_STREAK } from "./game";
 import { screenshake } from "./renderer";
 import type { Damage as Dmg } from "./game";
-import { distance, vectorToAngle, angleBetweenPoints, vectorFromAngle } from "./helpers";
+import { distance, vectorToAngle, angleBetweenPoints, vectorFromAngle, clamp } from "./helpers";
 
 export class Attack extends Behaviour {
   onCollision(target: GameObject): void {
@@ -50,7 +50,10 @@ export class March extends Behaviour {
     });
 
     // Despawn units that march offscreen
-    if (this.object.x < 0 || this.object.x > game.stage.width) {
+    if (
+      (this.step < 0 && this.object.x < 0) ||
+      (this.step > 0 && this.object.x > game.stage.width)
+    ) {
       game.despawn(this.object);
     }
   }
