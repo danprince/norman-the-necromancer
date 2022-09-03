@@ -115,14 +115,14 @@ function drawObjects() {
       let { x } = object.center();
       drawOrbs(x, -6, object.hp, object.maxHp, sprites.health_orb, sprites.health_orb_empty);
     } else {
-      drawSceneSprite(sprites.health_orb, object.x, -10);
-      write(`${object.hp}/${object.maxHp}`, object.x + 6, 4);
+      drawSceneSprite(sprites.health_orb, object.x, -6);
+      write(`${object.hp}/${object.maxHp}`, object.x + 6, 0);
     }
 
     let { x } = object;
     for (let behaviour of object.behaviours) {
       if (behaviour.sprite) {
-        drawSceneSprite(behaviour.sprite, x, -16);
+        drawSceneSprite(behaviour.sprite, x, -12);
         x += behaviour.sprite[2] + 1;
       }
     }
