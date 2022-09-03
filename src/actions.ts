@@ -3,7 +3,7 @@ import * as fx from "./fx";
 import { Damage, Death, GameObject } from "./game";
 import { clamp, randomFloat, randomInt, vectorFromAngle } from "./helpers";
 import { Corpse, Spell, Skeleton } from "./objects";
-import { CORPSE, LIVING, MOBILE } from "./tags";
+import { CORPSE, MOBILE } from "./tags";
 
 export function Damage(
   object: GameObject,
@@ -38,7 +38,7 @@ export function Die(object: GameObject, killer?: GameObject) {
       ritual.onDeath?.(death);
     }
 
-    if (object.is(LIVING) && randomFloat() <= object.corpseChance) {
+    if (randomFloat() <= object.corpseChance) {
       game.spawn(Corpse(), center.x, center.y);
     }
 

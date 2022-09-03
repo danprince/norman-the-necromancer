@@ -207,6 +207,7 @@ export interface Ritual {
   onActive?(): void;
   onCast?(spell: GameObject): void;
   onResurrect?(): void;
+  onResurrection?(object: GameObject): void;
   onDeath?(death: Death): void;
 }
 

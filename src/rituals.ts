@@ -1,11 +1,11 @@
 import * as fx from "./fx";
 import * as sprites from "./sprites.json";
 import { Damage } from "./actions";
-import { Bleeding, Damaging, DespawnTimer, Doomed, Seeking } from "./behaviours";
+import { Bleeding, Burning, Damaging, DespawnTimer, Doomed, HitStreak, Seeking } from "./behaviours";
 import { tween } from "./engine";
-import { Behaviour, GameObject, Ritual } from "./game";
-import { DEG_180, DEG_360, DEG_90, distance, randomInt } from "./helpers";
-import { Chariot, Spell, WardStone } from "./objects";
+import { Behaviour, GameObject, MAX_STREAK, Ritual } from "./game";
+import { clamp, DEG_180, DEG_360, DEG_90, distance, randomInt, removeFromArray } from "./helpers";
+import { Spell, WardStone } from "./objects";
 import { screenshake } from "./renderer";
 import { LIVING, UNDEAD } from "./tags";
 
@@ -255,15 +255,6 @@ export let Drunkard: Ritual = {
     spell.vy += randomInt(100) - 50;
     spell.getBehaviour(Damaging)!.amount *= 2;
   },
-};
-
-export let Riders: Ritual = {
-  tags: NONE,
-  name: "Riders",
-  description: "Create a bone chariot each time you resurrect",
-  onResurrect() {
-    game.spawn(Chariot());
-  }
 };
 
 export let Pact: Ritual = {

@@ -282,3 +282,18 @@ Got the game size back down to 80% of the budget by combining the spritesheet/fo
 
 ## Day 20
 Should probably deduplicate some of the physics code between particles and game objects.
+
+Played around a little bit with a soul "streak" which adds a multiplier to your earned souls. The initial multiplier was a x1..10 which ended up feeling way too punishing to break a streak. Ended up trying out x1.1..2 instead. Adds some incentive to play carefully and "perfect" the early levels, but also makes the gameplay a little less carefree.
+
+Plans for the weekend.
+- [ ] Sort out the level spawns
+- [ ] Figure out ritual rarities + pricing
+- [ ] Add an endgame screen
+- [ ] Make resurrection a viable way to play
+- [ ] Make wardstones a legit mechanic
+- [ ] Figure out behaviour stacking
+- [ ] Experiement with behaviours as simple objects
+- [ ] Add keyboard controls
+
+## Day 21
+After beating the king, use a NG+ cycle which restarts the game at the beginning, but adds some buffs to enemies. It would be nice to change spawn patterns too, but might be annoying to implement.

@@ -2,8 +2,8 @@ import * as sprites from "./sprites.json";
 import * as fx from "./fx";
 import { Behaviour, GameObject } from "./game";
 import { BARRIER, CORPSE, LIVING, SPELL, MOBILE, PLAYER, UNDEAD } from "./tags";
-import { DEG_90, randomElement } from "./helpers";
-import { March, Attack, Damaging, Bleeding, Enraged, Summon } from "./behaviours";
+import { DEG_90, randomElement, randomInt } from "./helpers";
+import { March, Attack, Damaging, Bleeding, Enraged, Summon, Invulnerable } from "./behaviours";
 import { Damage, Die } from "./actions";
 import { tween } from "./engine";
 
@@ -40,7 +40,6 @@ export function Spell() {
   object.collisionMask = MOBILE;
   object.mass = 100;
   object.emitter = fx.trail();
-  object.bounce = 0;
   object.friction = 0.1;
   object.despawnOnCollision = true;
   object.despawnOnBounce = true;
@@ -98,8 +97,9 @@ export function TheKing() {
 
   let phase = 1
   let marching = new March(unit, -32);
-  let summons = new Summon(unit, RoyalGuard, 1000);
+  let summons = new Summon(unit, RoyalGuard, 2000);
   let enraged = new Enraged(unit, SPELL);
+  let invulnerable = new Invulnerable(unit);
   let boss = new Behaviour(unit);
 
   unit.addBehaviour(marching);
@@ -112,13 +112,13 @@ export function TheKing() {
       phase = 2;
       unit.addBehaviour(summons);
       unit.addBehaviour(enraged);
-      unit.removeBehaviour(marching);
-      unit.hp = amount + 1;
+      unit.addBehaviour(invulnerable);
+      marching.step *= -1;
     } else if (phase === 3 && willDie) {
       phase = 4;
       unit.hp = unit.maxHp = unit.maxHp / 2;
       unit.sprite = sprites.the_king_on_foot;
-      unit.updateSpeed = unit.updateClock = 500;
+      unit.updateSpeed = unit.updateClock = 1000;
       marching.step /= 2;
     }
   };
@@ -127,8 +127,9 @@ export function TheKing() {
     if (summons.summonCounter >= 10) {
       phase = 3;
       unit.removeBehaviour(enraged);
-      unit.addBehaviour(marching);
+      unit.removeBehaviour(invulnerable);
       unit.removeBehaviour(summons);
+      marching.step *= -1;
     }
   };
 
@@ -220,6 +221,7 @@ export function Rat() {
   unit.sprite = sprites.rat;
   unit.updateSpeed = 200;
   unit.souls = 1;
+  unit.corpseChance = 0;
   return unit;
 }
 

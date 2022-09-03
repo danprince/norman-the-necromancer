@@ -214,3 +214,11 @@ export class HitStreak extends Behaviour {
     }
   }
 }
+
+export class Invulnerable extends Behaviour {
+  sprite = sprites.status_shielded;
+
+  onDamage(damage: Dmg): void {
+    if (damage.amount > 0) damage.amount = 0;
+  }
+}
