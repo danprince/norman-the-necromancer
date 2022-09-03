@@ -53,10 +53,6 @@ export class GameObject {
   updateSpeed = 0;
   updateClock = 0;
 
-  constructor(props: Partial<GameObject> = {}) {
-    Object.assign(this, props);
-  }
-
   is(mask: number): boolean {
     return (this.tags & mask) > 0;
   }
@@ -86,7 +82,7 @@ export class GameObject {
   }
 
   addBehaviour(behaviour: Behaviour = new Behaviour(this)): Behaviour {
-    this.behaviours.unshift(behaviour);
+    this.behaviours.push(behaviour);
     behaviour.onAdded();
     return behaviour;
   }
