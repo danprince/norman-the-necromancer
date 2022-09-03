@@ -56,6 +56,13 @@ const MAX_CASTS = 1 << 4;
 const CASTING_RATE = 1 << 5;
 const CURSE = 1 << 6;
 
+export let Streak: Ritual = {
+  tags: NONE,
+  name: "Streak",
+  description: "",
+  onCast: spell => spell.addBehaviour(new HitStreak(spell)),
+};
+
 export let Bouncing: Ritual = {
   tags: BOUNCING,
   name: "Bouncing",
@@ -213,14 +220,15 @@ class RainSpell extends Behaviour {
       let p0 = this.object;
       let p1 = Spell();
       let p2 = Spell();
-      game.onCast(p1, true);
-      game.onCast(p2, true);
       p1.x = p2.x = p0.x;
       p1.y = p2.y = p0.y;
       p1.vx = p2.vx = p0.vx;
       p1.vy = p2.vy = p0.vy;
       p1.vx -= 20;
       p2.vx += 20;
+      p1.groupId = p2.groupId = p0.groupId;
+      game.onCast(p1, true);
+      game.onCast(p2, true);
       game.spawn(p1);
       game.spawn(p2);
     }

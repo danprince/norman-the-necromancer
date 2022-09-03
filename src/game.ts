@@ -20,6 +20,8 @@ declare global {
   }
 }
 
+export const MAX_STREAK = 10;
+
 export class GameObject {
   // Physics
   x = 0;
@@ -44,6 +46,7 @@ export class GameObject {
   corpseChance = 0;
   despawnOnCollision = false;
   despawnOnBounce = false;
+  groupId = 0;
 
   // Behaviours
   behaviours: Behaviour[] = [];
@@ -279,6 +282,14 @@ export class Game {
     }
 
     removeFromArray(this.objects, object);
+  }
+
+  getStreakMultiplier() {
+    return this.streak / MAX_STREAK;
+  }
+
+  addSouls(amount: number) {
+    this.souls += amount + amount * this.getStreakMultiplier();
   }
 
   addRitual(ritual: Ritual) {

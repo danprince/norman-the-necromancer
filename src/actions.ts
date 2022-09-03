@@ -42,13 +42,14 @@ export function Die(object: GameObject, killer?: GameObject) {
       game.spawn(Corpse(), center.x, center.y);
     }
 
-    game.souls += death.souls;
+    game.addSouls(death.souls);
   }
 
   game.despawn(object);
 }
 
 let castAnimationTimeout = 0;
+let castGroupId = 1;
 
 export function Cast() {
   let { spell, player } = game;
@@ -62,6 +63,7 @@ export function Cast() {
 
   let power = spell.basePower + game.getCastingEnergy() * 100;
   let targetAngle = spell.targetAngle - (spell.shotsPerRound * spell.shotOffsetAngle / 2);
+  let groupId = castGroupId++;
 
   for (let j = 0; j < spell.shotsPerRound; j++) {
     let projectile = Spell();
@@ -72,6 +74,7 @@ export function Cast() {
     projectile.y = y - projectile.sprite[3] / 2;
     projectile.vx = vx * power;
     projectile.vy = vy * power;
+    projectile.groupId = groupId;
     game.spawn(projectile);
     game.onCast(projectile);
   }

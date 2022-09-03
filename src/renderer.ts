@@ -74,7 +74,10 @@ function drawHud() {
     drawSprite(sprite, 11 + i * 4, 6);
   }
 
-  write(`${ICON_SOULS}${game.souls}`, canvas.width / 2 - 30, 0);
+  let souls = game.souls | 0;
+  let multiplier = game.getStreakMultiplier();
+  let bonus = multiplier ? `(+${multiplier * 100 + "%"})` : "";
+  write(`${ICON_SOULS}${souls} ${bonus}`, canvas.width / 2 - 30, 0);
 
   let timer = game.ability.timer / 1000 | 0;
   let cooldown = game.ability.cooldown / 1000 | 0;

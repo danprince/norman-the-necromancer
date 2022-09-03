@@ -5,7 +5,7 @@ import { Cast, Resurrect } from "./actions";
 import { angleBetweenPoints } from "./helpers";
 import { Player } from "./objects";
 import { isLevelFinished, updateLevel } from "./levels";
-import { Bleed, Bouncing, Broken, Ceiling, Drunkard, Explosive, Homing, Knockback, Meteoric, Pact, Piercing, Rain, Seance, SplitOnBounce, Splitshot, Triggerfinger, Weightless } from "./rituals";
+import { Bleed, Bouncing, Broken, Ceiling, Drunkard, Explosive, Homing, Knockback, Meteoric, Pact, Piercing, Rain, Seance, SplitOnBounce, Splitshot, Streak, Triggerfinger, Weightless } from "./rituals";
 import { buy, restockShop, selectShopIndex, shop } from "./shop";
 
 let player = Player();
@@ -58,6 +58,8 @@ function update(dt: number) {
     restockShop();
   }
 }
+
+game.addRitual(Streak);
 
 shop.rituals = [
   Ceiling,

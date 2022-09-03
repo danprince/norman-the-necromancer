@@ -183,3 +183,31 @@ export class Summon extends Behaviour {
     }
   }
 }
+
+interface SpellCounter {
+  total: number;
+  hits: number;
+}
+
+export class HitStreak extends Behaviour {
+  static counters: Record<number, SpellCounter> = {};
+  hit = false;
+  counter: SpellCounter = undefined!;
+  onCollision = () => this.hit = true;
+
+  onAdded = () => {
+    this.counter = HitStreak.counters[this.object.groupId] ||= { total: 0, hits: 0 };
+    this.counter.total++;
+  }
+
+  onRemoved() {
+    if (this.hit) this.counter.hits++;
+    if (--this.counter.total) return;
+
+    if (this.counter.hits) {
+      game.streak = clamp(game.streak + 1, 0, MAX_STREAK);
+    } else {
+      game.streak = 0;
+    }
+  }
+}
