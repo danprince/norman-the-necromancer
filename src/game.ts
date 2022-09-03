@@ -275,7 +275,7 @@ export class Game {
   despawn(object: GameObject) {
     object.emitter?.remove();
 
-    for (let behaviour of object.behaviours) {
+    for (let behaviour of Array.from(object.behaviours)) {
       object.removeBehaviour(behaviour);
     }
 
