@@ -141,6 +141,7 @@ export function init(width: number, height: number, update: (dt: number) => void
     update(t1 - t0);
     t0 = t1;
   })();
+  onfocus = () => t0 = performance.now();
 }
 
 type Easing = (t: number) => number;
