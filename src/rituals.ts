@@ -1,11 +1,11 @@
 import * as fx from "./fx";
 import * as sprites from "./sprites.json";
 import { Damage } from "./actions";
-import { Bleeding, Burning, Damaging, DespawnTimer, Doomed, HitStreak, Seeking } from "./behaviours";
+import { Bleeding, Damaging, DespawnTimer, Doomed, HitStreak, Seeking } from "./behaviours";
 import { tween } from "./engine";
-import { Behaviour, GameObject, MAX_STREAK, Ritual } from "./game";
-import { clamp, DEG_180, DEG_360, DEG_90, distance, randomInt, removeFromArray } from "./helpers";
-import { Spell, WardStone } from "./objects";
+import { Behaviour, GameObject, Ritual } from "./game";
+import { DEG_180, DEG_360, DEG_90, distance, randomInt } from "./helpers";
+import { SkeletonLord, Spell, WardStone } from "./objects";
 import { screenshake } from "./renderer";
 import { LIVING, UNDEAD } from "./tags";
 
@@ -356,4 +356,13 @@ export let Doom: Ritual = {
       target.addBehaviour(new Doomed(target));
     };
   }
+};
+
+export let BigFred: Ritual = {
+  tags: NONE,
+  name: "Big Fred",
+  description: "Summon Norman's Neighbour each resurrection",
+  onResurrect() {
+    game.spawn(SkeletonLord(), game.player.x, game.player.y);
+  },
 };
