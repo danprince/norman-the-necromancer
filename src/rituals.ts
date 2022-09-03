@@ -3,7 +3,7 @@ import * as sprites from "./sprites.json";
 import { Damage } from "./actions";
 import { Bleeding, Damaging, DespawnTimer, Doomed, HitStreak, Seeking } from "./behaviours";
 import { tween } from "./engine";
-import { Behaviour, GameObject, Ritual } from "./game";
+import { Behaviour, GameObject, RARE, Ritual } from "./game";
 import { DEG_180, DEG_360, DEG_90, distance, randomInt } from "./helpers";
 import { SkeletonLord, Spell, WardStone } from "./objects";
 import { screenshake } from "./renderer";
@@ -127,6 +127,7 @@ class ProjectileExplode extends Behaviour {
 export let Explosive: Ritual = {
   tags: EXPLOSIVE,
   exclusiveTags: BOUNCING,
+  rarity: RARE,
   name: "Explosive",
   description: "Spells explode on impact",
   onCast(projectile) {
@@ -137,6 +138,7 @@ export let Explosive: Ritual = {
 export let Splitshot: Ritual = {
   tags: SPLITTING,
   exclusiveTags: SPLITTING,
+  rarity: RARE,
   name: "Splitshot",
   description: "Shot 3 projectiles",
   onActive() {
@@ -146,6 +148,7 @@ export let Splitshot: Ritual = {
 
 export let Homing: Ritual = {
   tags: HOMING,
+  rarity: RARE,
   name: "Homing",
   description: "Spells seek living enemies",
   onCast(projectile) {
@@ -155,6 +158,7 @@ export let Homing: Ritual = {
 
 export let Weightless: Ritual = {
   tags: NONE,
+  rarity: RARE,
   name: "Weightless",
   description: "Spells are not affected by gravity",
   onCast(spell) {
@@ -166,6 +170,7 @@ export let Weightless: Ritual = {
 
 export let Piercing: Ritual = {
   tags: NONE,
+  rarity: RARE,
   name: "Piercing",
   // TODO: Too powerful, maybe percentage chance instead? Or maybe getting weaker?
   description: "Spells pass through enemies",
@@ -238,6 +243,7 @@ class RainSpell extends Behaviour {
 export let Rain: Ritual = {
   tags: SPLITTING,
   exclusiveTags: SPLITTING,
+  rarity: RARE,
   name: "Rain",
   description: "Spells split when they start to drop",
   recursive: false,
@@ -281,6 +287,7 @@ export let Seance: Ritual = {
 
 export let Broken: Ritual = {
   tags: NONE,
+  rarity: RARE,
   name: "Broken",
   description: "Deal 3x damage, but max hp is reduced to 1",
   onActive() {

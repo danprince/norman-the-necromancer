@@ -5,7 +5,7 @@ import { Cast, Resurrect } from "./actions";
 import { angleBetweenPoints } from "./helpers";
 import { Player } from "./objects";
 import { isLevelFinished, updateLevel } from "./levels";
-import { Bleed, Bouncing, Broken, Ceiling, Drunkard, Explosive, Homing, Knockback, Meteoric, Pact, Piercing, Rain, Seance, SplitOnBounce, Splitshot, Streak, Triggerfinger, Weightless } from "./rituals";
+import { Bleed, Bouncing, Broken, Ceiling, Doom, Drunkard, Explosive, Homing, Knockback, Meteoric, Pact, Piercing, Rain, Seance, SplitOnBounce, Splitshot, Streak, Triggerfinger, Weightless } from "./rituals";
 import { buy, restockShop, selectShopIndex, shop } from "./shop";
 
 let player = Player();
@@ -66,7 +66,9 @@ shop.rituals = [
   Splitshot,
   Homing,
   Weightless,
-  Piercing,
+  Doom,
+  // Piercing is way too strong
+  //Piercing,
   Knockback,
   Drunkard,
   Pact,

@@ -1,6 +1,6 @@
 import { Damage } from "./actions";
-import { PLAYING, Ritual, ShopItem } from "./game";
-import { clamp, removeFromArray, shuffled } from "./helpers";
+import { PLAYING, RARE, Ritual, ShopItem } from "./game";
+import { clamp, randomInt, removeFromArray, shuffled } from "./helpers";
 import { nextLevel } from "./levels";
 
 export interface Shop {
@@ -47,18 +47,19 @@ export function restockShop() {
 }
 
 export function createRitualItems(): ShopItem[] {
-  return shuffled(shop.rituals)
-    .filter(ritual => game.canAddRitual(ritual))
-    .slice(0, 3)
-    .map((ritual): ShopItem => {
-      return {
-        name: ritual.name,
-        description: ritual.description,
-        cost: 100,
-        purchase() {
-          removeFromArray(shop.rituals, ritual);
-          game.addRitual(ritual);
-        }
-      };
-    });
+  let rituals = shuffled(shop.rituals.filter(ritual => game.canAddRitual(ritual)));
+  let commons = rituals.filter(r => r.rarity !== RARE);
+  let rares = rituals.filter(r => r.rarity === RARE);
+  let pool = rares.slice(0, 1).concat(commons.slice(0, 2));
+  return pool.map((ritual): ShopItem => {
+    return {
+      name: ritual.name,
+      description: ritual.description,
+      cost: ritual.rarity === RARE ? 200 + randomInt(100) : 75 + randomInt(100),
+      purchase() {
+        removeFromArray(shop.rituals, ritual);
+        game.addRitual(ritual);
+      },
+    };
+  });
 }

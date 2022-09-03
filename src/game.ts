@@ -22,6 +22,10 @@ declare global {
 
 export const MAX_STREAK = 10;
 
+export type Rarity = typeof COMMON | typeof RARE;
+export const COMMON = 0;
+export const RARE = 1;
+
 export class GameObject {
   // Physics
   x = 0;
@@ -203,6 +207,7 @@ export interface Ritual {
   exclusiveTags?: number;
   requiredTags?: number;
   recursive?: boolean;
+  rarity?: Rarity;
   onFrame?(dt: number): void;
   onActive?(): void;
   onCast?(spell: GameObject): void;
