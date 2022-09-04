@@ -227,7 +227,7 @@ export function Piper() {
   unit.sprite = sprites.piper;
   unit.updateSpeed = 500;
   unit.hp = unit.maxHp = 15;
-  unit.addBehaviour(new Summon(unit, Rat, 1000));
+  unit.addBehaviour(new Summon(unit, Rat, 2000));
   unit.souls = 200;
   return unit;
 }
