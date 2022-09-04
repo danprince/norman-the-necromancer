@@ -404,7 +404,7 @@ export function useLevelSynths() {
   if (game.level === 0) synths.ambientOrgan.start();
   if (game.level === 1) synths.bass.start();
   if (game.level === 3) synths.kick.start();
-  if (game.level === 5) synths.lead.start();
+  if (game.level === 4) synths.lead.start();
   let levelSynths = game.level < 9 ? normalLevelSynths : bossLevelSynths;
   for (let synth of levelSynths) synth.enter();
 }
