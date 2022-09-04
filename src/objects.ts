@@ -45,9 +45,9 @@ export function Spell() {
   object.despawnOnCollision = true;
   object.despawnOnBounce = true;
   object.addBehaviour(new Damaging(object));
-  let sounds = object.addBehaviour();
-  sounds.onBounce = sfx.pluck;
-  sounds.onCollision = sfx.chime;
+  //let sounds = object.addBehaviour();
+  //sounds.onBounce = sfx.pluck;
+  //sounds.onCollision = sfx.chime;
   return object;
 }
 

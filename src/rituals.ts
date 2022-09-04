@@ -211,6 +211,7 @@ export let Knockback: Ritual = {
 
 export let Ceiling: Ritual = {
   tags: NONE,
+  requiredTags: BOUNCING,
   name: "Ceiling",
   description: "Adds a ceiling",
   onActive() {

@@ -61,7 +61,6 @@ export function Cast() {
   player.sprite = sprites.norman_arms_up;
   clearTimeout(castAnimationTimeout);
   castAnimationTimeout = setTimeout(() => player.sprite = sprites.norman_arms_down, 500);
-  sfx.pluck();
 
   let power = spell.basePower;
   let targetAngle = spell.targetAngle - (spell.shotsPerRound * spell.shotOffsetAngle / 2);

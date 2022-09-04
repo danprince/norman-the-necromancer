@@ -6,7 +6,7 @@ import { angleBetweenPoints } from "./helpers";
 import { Player } from "./objects";
 import { isLevelFinished, updateLevel } from "./levels";
 import { Bleed, Bouncing, Broken, Ceiling, Doom, Drunkard, Explosive, Homing, Knockback, Meteoric, Pact, Piercing, Rain, Seance, SplitOnBounce, Splitshot, Streak, Triggerfinger, Weightless } from "./rituals";
-import { buy, restockShop, selectShopIndex, shop } from "./shop";
+import { buy, enterShop, restockShop, selectShopIndex, shop } from "./shop";
 
 let player = Player();
 let game = new Game(player);
@@ -50,10 +50,11 @@ function update(dt: number) {
   updateParticles(dt);
 
   if (game.state === PLAYING && isLevelFinished()) {
-    game.state = SHOPPING;
-    restockShop();
+    enterShop();
   }
 }
+
+game.addRitual(Streak);
 
 shop.rituals = [
   Ceiling,
