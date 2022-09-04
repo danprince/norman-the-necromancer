@@ -4,10 +4,11 @@ import { Damage } from "./actions";
 import { Bleeding, Damaging, DespawnTimer, Doomed, HitStreak, Seeking } from "./behaviours";
 import { tween } from "./engine";
 import { Behaviour, GameObject, RARE, Ritual } from "./game";
-import { DEG_180, DEG_360, DEG_90, distance, randomInt } from "./helpers";
+import { angleBetweenPoints, clamp, DEG_180, DEG_360, DEG_90, distance, randomInt, vectorFromAngle } from "./helpers";
 import { SkeletonLord, Spell, WardStone } from "./objects";
 import { screenshake } from "./renderer";
 import { LIVING, UNDEAD } from "./tags";
+import "./sounds"
 
 /*
 - Every nth shot
@@ -187,15 +188,15 @@ class KnockbackSpell extends Behaviour {
     //target.addBehaviour(new Stunned(target));
 
     // Knock objects backwards
-    //for (let object of game.objects) {
-    //  if (this.object.collisionMask & object.tags) {
-    //    let dist = distance(this.object, object);
-    //    let scale = 1 - clamp(dist / 50, 0, 1);
-    //    let [vx] = vectorFromAngle(angleBetweenPoints(this.object, object));
-    //    object.vx = vx * 50 * scale;
-    //    object.vy = 100 * scale;
-    //  }
-    //}
+    for (let object of game.objects) {
+      if (this.object.collisionMask & object.tags) {
+        let dist = distance(this.object, object);
+        let scale = 1 - clamp(dist / 50, 0, 1);
+        let [vx] = vectorFromAngle(angleBetweenPoints(this.object, object));
+        object.vx = vx * 50 * scale;
+        object.vy = 100 * scale;
+      }
+    }
   }
 }
 

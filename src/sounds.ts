@@ -1,4 +1,5 @@
-import { randomElement } from "./helpers";
+import { createLogger } from "vite";
+import { randomElement, randomInt, shuffled } from "./helpers";
 
 function freq(step: number): number {
   // fn = f0 * a^n
@@ -61,20 +62,17 @@ const G5 = 22;
 const ORGAN = [-0.8, 1, 0.8, 0.8, -0.8, -0.8, -1];
 
 // Tempo
-const BPM = 130;
+const BPM = 240;
 
-const SCALE = [
-  A4,
-  B4,
-  C4,
-  D4,
-  E4,
-  F4,
-  Ab4,
-  A5,
+const A_HARMONIC_MINOR = [
+  A3, B3, C3, D3, F3, E3, Ab4, A4,
+  A4, B4, C4, D4, F4, E4, Ab5, A5,
 ];
 
-let masterGain = new GainNode(ctx, { gain: 0.9 });
+// prettier-ignore
+const BASS_MELODY = [2,4,5,8,-12,8,-1,4,-12,4,-10,8,-4,4,-4,8,0,4,2,4,-9,4,12,4,12,8,12,8,0,8,12,4,3,8,5,4,-12,4,-12,4,2,4,5,8,-12,8,-1,4,-12,4,-10,8,-4,4,-4,8,0,4,2,4,-9,4,12,4,12,8,12,8,0,8,12,4,3,8,5,4,-12,4,-12,4,2,4,5,8,-12,8,-1,4,-12,4,-10,8,-4,4,-4,8,0,4,2,4,-9,4,12,4,12,8,12,8,0,8,12,4,3,8,5,4,-12,4,-12,4,12,4,-4,8,2,8,-1,4,-9,8,-7,4,-10,4,-7,4,7,4,-1,4,-7,4,-4,8,-5,8,2,4,-5,8,-4,4,-12,4,-1,4,2,4,2,4,5,8,-12,8,-1,4,-12,4,-10,8,-4,4,-4,8,0,4,2,4,-9,4,12,4,12,8,12,8,0,8,12,4,3,8,5,4,-12,4,-12,4,2,4,5,8,-12,8,-1,4,-12,4,-10,8,-4,4,-4,8,0,4,2,4,-9,4,12,4,12,8,12,8,0,8,12,4,3,8,5,4,-12,4,-12,4,2,4,5,8,-12,8,-1,4,-12,4,-10,8,-4,4,-4,8,0,4,2,4,-9,4,12,4,12,8,12,8,0,8,12,4,3,8,5,4,-12,4,-12,4,-5,8,-5,8,-12,8,-5,4,0,4,-5,4,-5,8,-5,4,-12,4,-12,4,-12,8,0,8,0,8,0,4,-5,8,-12,8,0,8,-12,4,0,8,-5,4,0,4,-12,8];
+
+let masterGain = new GainNode(ctx, { gain: 0 });
 masterGain.connect(ctx.destination);
 
 function whitenoise(length: number) {
@@ -87,42 +85,34 @@ function whitenoise(length: number) {
   for (let i = 0; i < bufferSize; i++) {
     data[i] = Math.random() * 2 - 1;
   }
-
   return new AudioBufferSourceNode(ctx, { buffer });
 }
 
-export function cast() {
-  bell();
-}
-
-export function bell() {
+export function pluck() {
   let t = ctx.currentTime;
-  let gain = new GainNode(ctx, { gain: 0.2 });
+  let gain = new GainNode(ctx, { gain: 0.5 });
   gain.connect(masterGain);
 
-  let convolver = reverb(2, 3);
+  let convolver = createReverb(2, 1);
   convolver.connect(gain);
-
-  let hz = freq(randomElement(SCALE));
 
   let filter = new BiquadFilterNode(ctx, {
     type: "lowpass",
-    frequency: hz,
+    frequency: 800,
   });
   filter.connect(gain);
   filter.connect(convolver);
 
   let osc = new OscillatorNode(ctx, {
-    frequency: filter.frequency.value,
-    type: "sine",
+    frequency: freq(randomElement([A4])),
+    type: "sawtooth",
   });
   osc.connect(filter);
   osc.start(t);
   osc.stop(t + 5);
   osc.onended = () => filter.disconnect();
 
-  filter.frequency.exponentialRampToValueAtTime(0.001, t + 0.1);
-  gain.gain.linearRampToValueAtTime(0.01, t + 5);
+  filter.frequency.setTargetAtTime(0, t + 0.01, 0.05);
   return gain;
 }
 
@@ -131,10 +121,10 @@ export function chime() {
   let gain = new GainNode(ctx, { gain: 0.2 });
   gain.connect(masterGain);
 
-  let convolver = reverb(2, 3);
+  let convolver = createReverb(2, 3);
   convolver.connect(gain);
 
-  let hz = freq(randomElement(SCALE));
+  let hz = freq(randomElement(A_HARMONIC_MINOR));
 
   let filter = new BiquadFilterNode(ctx, {
     type: "lowpass",
@@ -159,38 +149,23 @@ export function chime() {
 
 export function ascending() {
   let t = ctx.currentTime;
-  let gain = new GainNode(ctx, { gain: 0.2 });
+
+  let gain = new GainNode(ctx);
   gain.connect(masterGain);
 
-  let convolver = reverb(2, 3);
-  convolver.connect(gain);
-
-  let hz = freq(randomElement(SCALE));
-
-  let filter = new BiquadFilterNode(ctx, {
-    type: "lowpass",
-    frequency: hz,
-  });
-  filter.connect(gain);
-  filter.connect(convolver);
-
-  let osc = new OscillatorNode(ctx, {
-    frequency: filter.frequency.value,
-    type: "sine",
-  });
-  osc.connect(filter);
+  let osc = new OscillatorNode(ctx, { type: "sine" });
+  osc.connect(gain);
   osc.start();
 
-  SCALE.forEach((step, index) => {
-    osc.frequency.setValueAtTime(freq(step), t + index * E);
+  A_HARMONIC_MINOR.forEach((step, index) => {
+    let time = t + index * 0.1;
+    osc.frequency.setValueAtTime(freq(step), time);
+    gain.gain.setValueAtTime(0.5, time);
+    gain.gain.setTargetAtTime(0, time + 0.19, 0.1);
   });
-
-  filter.frequency.exponentialRampToValueAtTime(0.1, t + 1);
-  gain.gain.linearRampToValueAtTime(0.01, t + 5);
-  return gain;
 }
 
-function reverb(duration = 3, decay = 2) {
+function createReverb(duration = 3, decay = 2) {
   let convolver = new ConvolverNode(ctx, {});
 
   let rate = ctx.sampleRate;
@@ -209,37 +184,106 @@ function reverb(duration = 3, decay = 2) {
   return convolver;
 }
 
-function plink(node: AudioNode): AudioNode {
-  let gain = new GainNode(ctx, { gain: 0.2 });
-  gain.connect(masterGain);
-
-  let convolver = reverb(3, 2);
-  convolver.connect(gain);
-
-  let hz = freq(randomElement(SCALE));
-
-  let filter = new BiquadFilterNode(ctx, {
-    type: "lowpass",
-    frequency: hz,
-  });
-  filter.connect(gain);
-  filter.connect(convolver);
-  node.connect(filter);
-  return gain;
+interface Synth {
+  volume: GainNode,
+  gain: GainNode;
+  osc: OscillatorNode;
+  filter: BiquadFilterNode;
+  play(time: number, frequency: number, duration: number): void;
+  start(): void;
+  enter(): void;
+  exit(): void;
 }
 
-type Effect = (node: AudioNode) => AudioNode;
-
-function sequence(pattern: number[], retune: number = 0, effect: Effect = node => node) {
-  let gainNode = new GainNode(ctx, { gain: 0.4 });
-
-  let osc = new OscillatorNode(ctx, {
-    periodicWave: ctx.createPeriodicWave(ORGAN, ORGAN),
-    frequency: __,
+function Synth(): Synth {
+  let volume = new GainNode(ctx, { gain: 1 });
+  volume.connect(masterGain);
+  let gain = new GainNode(ctx, { gain: 0 });
+  gain.connect(volume);
+  let filter = new BiquadFilterNode(ctx, {
+    type: "lowpass",
+    frequency: 500,
   });
-  effect(osc).connect(gainNode);
+  filter.connect(gain);
+  let osc = new OscillatorNode(ctx);
+  osc.connect(filter);
+  return {
+    gain,
+    osc,
+    filter,
+    volume,
+    play(time, frequency) {
+      gain.gain.setValueAtTime(0.2, time);
+      osc.frequency.setValueAtTime(frequency, time);
+    },
+    start() {
+      osc.start();
+      this.enter();
+    },
+    enter() {
+      volume.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 1);
+    },
+    exit() {
+      volume.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 1);
+    },
+  };
+}
 
+function Organ(duration = 1, decay = 1): Synth {
+  let synth = Synth();
+  synth.osc.setPeriodicWave(ctx.createPeriodicWave(ORGAN, ORGAN));
+  let reverb = createReverb(duration, decay);
+  reverb.connect(synth.gain);
+  synth.filter.connect(reverb);
+  synth.filter.type = "highpass";
+  synth.filter.frequency.value = 200;
+  return synth;
+}
+
+function Kick(): Synth {
+  let synth = Synth();
+  synth.filter.type = "lowpass";
+  synth.filter.frequency.value = 80;
+  synth.osc.frequency.value = 150;
+  synth.play = time => {
+    synth.osc.frequency.setValueAtTime(150, time);
+    synth.gain.gain.setValueAtTime(1, time);
+    synth.filter.frequency.setValueAtTime(80, time);
+    synth.osc.frequency.exponentialRampToValueAtTime(0.001, time + 0.5);
+    synth.gain.gain.exponentialRampToValueAtTime(0.001, time + 0.5);
+    synth.filter.frequency.linearRampToValueAtTime(0.001, time + 0.5);
+  };
+  return synth;
+}
+
+function createDistortion() {
+  let amount = 1000000000;
+  let samples = 256;
+  let curve = new Float32Array(samples);
+  for (let i = 0; i < samples; ++i) {
+    let x = (i * 2) / samples - 1;
+    curve[i] = ((Math.PI + amount) * x) / (Math.PI + amount * Math.abs(x));
+  }
+  return new WaveShaperNode(ctx, { curve });
+}
+
+function Lead(): Synth {
+  let synth = Synth();
+  let convolver = createReverb(3, 1);
+  convolver.connect(synth.gain);
+  synth.filter.connect(convolver);
+  synth.osc.type = "sawtooth";
+  synth.play = (time, frequency) => {
+    synth.osc.frequency.setValueAtTime(frequency, time);
+    synth.gain.gain.setValueAtTime(0.25, time);
+    synth.gain.gain.setTargetAtTime(0, time + 0.05, 0.2);
+  };
+  return synth;
+}
+
+function sequence(pattern: number[], retune: number = 0, synth: Synth) {
   let time = ctx.currentTime;
+  let _resolve = () => {};
 
   function loop() {
     let looper = new OscillatorNode(ctx);
@@ -248,76 +292,123 @@ function sequence(pattern: number[], retune: number = 0, effect: Effect = node =
       let note = pattern[i];
       let hold = 60 / BPM * 1 / (pattern[i + 1] / 4);
       let hz = freq(note + retune);
-      osc.frequency.setValueAtTime(hz, time); time += hold;
+      synth.play(time, hz, hold);
+      time += hold;
     }
     looper.stop(time);
     looper.onended = loop;
   }
 
   loop();
-  osc.start();
-  let convolver = reverb(3, 2);
-  convolver.connect(masterGain);
-  gainNode.connect(convolver);
+  return () => new Promise<void>(resolve => _resolve = resolve);
 }
 
 let init = false;
+
+function createPattern(
+  beats = 4,
+  lengths = [W, H, Q, E],
+  notes = A_HARMONIC_MINOR,
+) {
+  let time = beats;
+  let pattern = [];
+
+  while (time > 0) {
+    let length = randomElement(lengths);
+    let note = randomElement(notes);
+    let duration = 1 / length;
+    if (time - duration < 0) continue;
+    time -= duration;
+    pattern.push(note, length);
+  }
+  return pattern;
+}
+
+function harmonise(pattern: number[], interval = 3, scale = A_HARMONIC_MINOR): number[] {
+  return pattern.map((value, i) => {
+    if (i % 2) return value;
+    return scale[(scale.indexOf(value) + interval - 1) % 16];
+  });
+}
+
+function createBassline() {
+  let a = createPattern(4, [E, Q], [A_HARMONIC_MINOR, A3, A3, A3, A3, A3].flat());
+  let b = createPattern(4, [E, Q], A_HARMONIC_MINOR);
+  let c = createPattern(4, [E, Q], A_HARMONIC_MINOR);
+  let d = createPattern(4, [E, Q], [A3, A4, E3].flat());
+  let p = [
+    a, a, a, b,
+    a, a, a, d,
+  ].flat();
+  p = BASS_MELODY;
+  return p;
+}
+
+function createLeadLine() {
+  let a = createPattern(1, [E, E, Q], [...A_HARMONIC_MINOR, A4, A4, A3, A3, E4, E4, A4, A4]);
+  let b = createPattern(1, [E, Q], [...A_HARMONIC_MINOR, A4, A4, A3, A3, E4, E4, A4, A4]);
+  let c = createPattern(4, [W], [__]);
+  return [a, a, c, b, b, c, a, b, c].flat();
+}
+
+export let synths = {
+  kick: Kick(),
+  ambientOrgan: Organ(6, 1),
+  lead: Organ(2, 0.5),
+  bass: Lead(),
+  kingsOrgan1: Organ(1, 1),
+  kingsOrgan2: Organ(1, 1),
+  kingsBass: Organ(),
+};
 
 function play() {
   if (init) return;
   init = true;
 
-  sequence([
-    A4, Q,
-    __, Q,
-  ], -36);
+  let kingsBass = [
+    A4, W / 2,
+    B4, W / 2,
+    C4, W / 2,
+    B4, W / 2,
+  ];
 
-  //sequence([
-  //  A4, W,
-  //  B4, W,
-  //  C4, W,
-  //  B4, W,
-  //], -36);
+  sequence([A4, H, __, H], -36, synths.kick);
+  sequence([A4, H, A3, H], -36, synths.ambientOrgan);
+  sequence(createBassline(), -24, synths.bass);
+  sequence(createLeadLine(), 0, synths.lead);
+  sequence(kingsBass, -36, synths.kingsBass);
 
-  //sequence([
-  //  A4, Q,
-  //  B4, Q,
-  //  C4, Q,
-  //  B4, Q,
-  //], -12);
+  {
+    // King's Organ
+    let p1 = [A4, H, B4, H, C4, H, B4, H];
+    let p2 = [A4, H, B4, H, C4, H, D4, H];
+    let p = [p1, p1, p1, p2].flat();
+    sequence(p, 0, synths.kingsOrgan1);
+    sequence(p, -12, synths.kingsOrgan2);
+  }
 
-  //sequence([
-  //  A4, Q,
-  //  B4, Q,
-  //  C4, Q,
-  //  B4, Q,
-  //], -12, plink);
+  let t = ctx.currentTime;
+  masterGain.gain.linearRampToValueAtTime(0.5, t + 5);
+  useLevelSynths();
+}
 
-  //let p1 = [
-  //  E4, E,
-  //  Eb4, E,
-  //  C4, E,
-  //  B4, E,
-  //];
-  //let p2 = [
-  //  Gb4, E,
-  //  Eb4, E,
-  //  C4, E,
-  //  B4, E,
-  //];
-  //let p3 = [
-  //  C4, E,
-  //  B4, E,
-  //  D4, E,
-  //  C4, E,
-  //];
-  //let p = [...p1, ...p1, ...p1, ...p2, ...p1, ...p1, ...p1, ...p3];
-  //sequence(p, -12, plink);
+let normalLevelSynths: Synth[] = [synths.kick, synths.bass, synths.lead];
+let bossLevelSynths: Synth[] = [synths.kingsBass, synths.kingsOrgan1, synths.kingsOrgan2];
+
+export function useShopSynths() {
+  synths.kick.exit();
+  synths.lead.exit();
+}
+
+export function useLevelSynths() {
+  if (game.level === 0) synths.ambientOrgan.start();
+  if (game.level === 1) synths.bass.start();
+  if (game.level === 3) synths.kick.start();
+  if (game.level === 5) synths.lead.start();
+  let levelSynths = game.level < 9 ? normalLevelSynths : bossLevelSynths;
+  for (let synth of levelSynths) synth.enter();
 }
 
 document.body.addEventListener("click", () => {
-  ctx.resume();
   play();
 });
-
-export {}

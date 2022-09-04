@@ -1,6 +1,6 @@
 import * as sprites from "./sprites.json";
 import * as fx from "./fx";
-//import * as sfx from "./sounds";
+import * as sfx from "./sounds";
 import { Damage, Death, GameObject } from "./game";
 import { clamp, randomFloat, randomInt, vectorFromAngle } from "./helpers";
 import { Corpse, Spell, Skeleton } from "./objects";
@@ -61,7 +61,7 @@ export function Cast() {
   player.sprite = sprites.norman_arms_up;
   clearTimeout(castAnimationTimeout);
   castAnimationTimeout = setTimeout(() => player.sprite = sprites.norman_arms_down, 500);
-  //sfx.cast();
+  sfx.pluck();
 
   let power = spell.basePower;
   let targetAngle = spell.targetAngle - (spell.shotsPerRound * spell.shotOffsetAngle / 2);
@@ -111,5 +111,5 @@ export function Resurrect() {
     }
   }
 
-  //sfx.ascending();
+  sfx.ascending();
 }

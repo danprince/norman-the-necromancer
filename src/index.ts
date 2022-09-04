@@ -55,8 +55,6 @@ function update(dt: number) {
   }
 }
 
-game.addRitual(Streak);
-
 shop.rituals = [
   Ceiling,
   Explosive,

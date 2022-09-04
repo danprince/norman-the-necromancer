@@ -244,6 +244,7 @@ export class Game {
   state: State = PLAYING;
   souls: number = 0;
   streak: number = 0;
+  level: number = 0;
 
   spell: Spell = {
     targetAngle: 0,

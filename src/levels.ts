@@ -132,7 +132,10 @@ export function isLevelFinished() {
   return LEVELS[cursor] === END_OF_LEVEL && isCleared();
 }
 
-export let nextLevel = () => cursor++;
+export let nextLevel = () => {
+  cursor++;
+  game.level++;
+};
 
 export function updateLevel(dt: number) {
   let cmd = LEVELS[cursor];

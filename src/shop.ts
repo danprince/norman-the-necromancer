@@ -1,5 +1,6 @@
+import * as sfx from "./sounds";
 import { Damage } from "./actions";
-import { PLAYING, RARE, Ritual, ShopItem } from "./game";
+import { PLAYING, RARE, Ritual, ShopItem, SHOPPING } from "./game";
 import { clamp, randomInt, removeFromArray, shuffled } from "./helpers";
 import { nextLevel } from "./levels";
 
@@ -27,6 +28,19 @@ export function buy() {
 
 export function selectShopIndex(step: number) {
   shop.selectedIndex = clamp(shop.selectedIndex + step, 0, shop.items.length - 1);
+  sfx.pluck();
+}
+
+export function enterShop() {
+  game.state = SHOPPING;
+  restockShop();
+  sfx.useShopSynths();
+}
+
+export function exitShop() {
+  game.state = PLAYING;
+  nextLevel();
+  sfx.useLevelSynths();
 }
 
 export function restockShop() {
@@ -38,10 +52,7 @@ export function restockShop() {
     }),
     ShopItem(10, "Charge", "+1\x7F max casts", () => game.spell.maxCasts++),
     ...createRitualItems(),
-    ShopItem(0, "Continue", "Begin the next level", () => {
-      game.state = PLAYING;
-      nextLevel();
-    }),
+    ShopItem(0, "Continue", "Begin the next level", () => exitShop()),
   ];
   shop.items = items.filter(item => item) as ShopItem[];
 }

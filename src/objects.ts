@@ -1,5 +1,6 @@
 import * as sprites from "./sprites.json";
 import * as fx from "./fx";
+import * as sfx from "./sounds";
 import { Behaviour, GameObject } from "./game";
 import { BARRIER, CORPSE, LIVING, SPELL, MOBILE, PLAYER, UNDEAD } from "./tags";
 import { DEG_90, randomElement } from "./helpers";
@@ -44,6 +45,9 @@ export function Spell() {
   object.despawnOnCollision = true;
   object.despawnOnBounce = true;
   object.addBehaviour(new Damaging(object));
+  let sounds = object.addBehaviour();
+  sounds.onBounce = sfx.pluck;
+  sounds.onCollision = sfx.chime;
   return object;
 }
 
@@ -222,7 +226,7 @@ export function Piper() {
   let unit = Villager();
   unit.sprite = sprites.piper;
   unit.updateSpeed = 500;
-  unit.hp = unit.maxHp = 25;
+  unit.hp = unit.maxHp = 15;
   unit.addBehaviour(new Summon(unit, Rat, 1000));
   unit.souls = 200;
   return unit;
