@@ -155,8 +155,8 @@ export function TheKing() {
 export function Champion() {
   let unit = Villager();
   unit.sprite = sprites.champion;
-  unit.updateSpeed = 2000;
-  unit.hp = unit.maxHp = 20;
+  unit.updateSpeed = 1000;
+  unit.hp = unit.maxHp = 10;
   unit.souls = 25;
   return unit;
 }
