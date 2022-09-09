@@ -141,9 +141,9 @@ export let Splitshot: Ritual = {
   exclusiveTags: SPLITTING,
   rarity: RARE,
   name: "Splitshot",
-  description: "Shot 3 projectiles",
+  description: "Shoot 2 projectiles",
   onActive() {
-    game.spell.shotsPerRound = 3;
+    game.spell.shotsPerRound = 2;
   },
 }
 
