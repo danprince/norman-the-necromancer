@@ -277,10 +277,26 @@ export function Chariot() {
 export function RageKnight() {
   let unit = Villager();
   unit.sprite = sprites.rage_knight;
-  unit.updateSpeed = 1000;
+  unit.updateSpeed = 500;
   unit.hp = unit.maxHp = 5;
-  unit.addBehaviour(new Bleeding(unit));
-  unit.addBehaviour(new Enraged(unit, SPELL));
+  let raging = unit.addBehaviour();
+  let march = unit.getBehaviour(March)!;
+  let enraged = new Enraged(unit, SPELL);
+  let angry = false;
+  let step = march.step;
+  raging.turns = 5;
+  raging.onUpdate = () => {
+    angry = !angry;
+
+    if (angry) {
+      unit.addBehaviour(enraged);
+    } else {
+      unit.removeBehaviour(enraged);
+    }
+
+    unit.sprite = angry ? sprites.rage_knight_enraged : sprites.rage_knight;
+    march.step = angry ? 0 : step;
+  };
   unit.souls = 50;
   return unit;
 }
