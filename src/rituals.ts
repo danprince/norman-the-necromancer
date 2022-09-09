@@ -188,15 +188,15 @@ class KnockbackSpell extends Behaviour {
     //target.addBehaviour(new Stunned(target));
 
     // Knock objects backwards
-    for (let object of game.objects) {
-      if (this.object.collisionMask & object.tags) {
-        let dist = distance(this.object, object);
-        let scale = 1 - clamp(dist / 50, 0, 1);
-        let [vx] = vectorFromAngle(angleBetweenPoints(this.object, object));
-        object.vx = vx * 50 * scale;
-        object.vy = 100 * scale;
-      }
-    }
+    //for (let object of game.objects) {
+    //  if (this.object.collisionMask & object.tags) {
+    //    let dist = distance(this.object, object);
+    //    let scale = 1 - clamp(dist / 50, 0, 1);
+    //    let [vx] = vectorFromAngle(angleBetweenPoints(this.object, object));
+    //    object.vx = vx * 50 * scale;
+    //    object.vy = 100 * scale;
+    //  }
+    //}
   }
 }
 
