@@ -346,6 +346,8 @@ export function RoyalGuardOrb() {
   unit.despawnOnBounce = true;
   unit.despawnOnCollision = true;
   unit.addBehaviour(new Damaging(unit));
+  unit.addBehaviour(new DespawnTimer(unit, 3000));
+  unit.friction = 0.9;
   unit.emitter = fx.royalty();
   return unit;
 }
