@@ -4,7 +4,7 @@ import * as sfx from "./sounds";
 import { Behaviour, GameObject } from "./game";
 import { BARRIER, CORPSE, LIVING, SPELL, MOBILE, PLAYER, UNDEAD } from "./tags";
 import { DEG_90, randomElement } from "./helpers";
-import { March, Attack, Damaging, Bleeding, Enraged, Summon, Invulnerable } from "./behaviours";
+import { March, Attack, Damaging, Bleeding, Enraged, Summon, Invulnerable, DespawnTimer } from "./behaviours";
 import { Damage, Die } from "./actions";
 import { tween } from "./engine";
 
