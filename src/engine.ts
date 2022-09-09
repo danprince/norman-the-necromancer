@@ -66,6 +66,7 @@ export function drawNineSlice(sprite: Sprite, x: number, y: number, w: number, h
   //     +-----+------+-----+
   //           |--w1--|
   let c = 3;
+  if (w <= c || h <= c) return;
   let sx1 = sx;
   let sx2 = sx + c;
   let sx3 = sx + sw - c;
