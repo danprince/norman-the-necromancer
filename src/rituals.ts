@@ -8,7 +8,6 @@ import { angleBetweenPoints, clamp, DEG_180, DEG_360, DEG_90, distance, randomIn
 import { SkeletonLord, Spell, WardStone } from "./objects";
 import { screenshake } from "./renderer";
 import { LIVING, UNDEAD } from "./tags";
-import "./sounds"
 
 /*
 - Every nth shot

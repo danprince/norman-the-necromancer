@@ -1,4 +1,3 @@
-import * as sfx from "./sounds";
 import { Damage } from "./actions";
 import { PLAYING, RARE, Ritual, ShopItem, SHOPPING } from "./game";
 import { clamp, randomInt, removeFromArray, shuffled } from "./helpers";
@@ -28,19 +27,18 @@ export function buy() {
 
 export function selectShopIndex(step: number) {
   shop.selectedIndex = clamp(shop.selectedIndex + step, 0, shop.items.length - 1);
-  sfx.pluck();
 }
 
 export function enterShop() {
   game.state = SHOPPING;
   restockShop();
-  sfx.useShopSynths();
+  //sfx.useShopSynths();
 }
 
 export function exitShop() {
   game.state = PLAYING;
   nextLevel();
-  sfx.useLevelSynths();
+  //sfx.useLevelSynths();
 }
 
 export function restockShop() {

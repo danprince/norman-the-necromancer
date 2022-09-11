@@ -1,6 +1,5 @@
 import * as sprites from "./sprites.json";
 import * as fx from "./fx";
-import * as sfx from "./sounds";
 import { Damage, Death, GameObject } from "./game";
 import { clamp, randomFloat, randomInt, vectorFromAngle } from "./helpers";
 import { Corpse, Spell, Skeleton } from "./objects";
@@ -109,6 +108,4 @@ export function Resurrect() {
       ritual.onResurrection?.(unit);
     }
   }
-
-  sfx.ascending();
 }

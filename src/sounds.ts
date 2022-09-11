@@ -1,4 +1,3 @@
-import { createLogger } from "vite";
 import { randomElement, randomInt, shuffled } from "./helpers";
 
 function freq(step: number): number {
@@ -75,7 +74,9 @@ const BASS_MELODY = [2,4,5,8,-12,8,-1,4,-12,4,-10,8,-4,4,-4,8,0,4,2,4,-9,4,12,4,
 let masterGain = new GainNode(ctx, { gain: 0 });
 masterGain.connect(ctx.destination);
 
-function whitenoise(length: number) {
+let startQueue: Synth[] = [];
+
+function createNoise(length: number) {
   let bufferSize = ctx.sampleRate * length;
   let buffer = new AudioBuffer({
     length: bufferSize,
@@ -88,82 +89,9 @@ function whitenoise(length: number) {
   return new AudioBufferSourceNode(ctx, { buffer });
 }
 
-export function pluck() {
-  let t = ctx.currentTime;
-  let gain = new GainNode(ctx, { gain: 0.5 });
-  gain.connect(masterGain);
-
-  let convolver = createReverb(2, 1);
-  convolver.connect(gain);
-
-  let filter = new BiquadFilterNode(ctx, {
-    type: "lowpass",
-    frequency: 800,
-  });
-  filter.connect(gain);
-  filter.connect(convolver);
-
-  let osc = new OscillatorNode(ctx, {
-    frequency: freq(randomElement([A4])),
-    type: "sawtooth",
-  });
-  osc.connect(filter);
-  osc.start(t);
-  osc.stop(t + 5);
-  osc.onended = () => filter.disconnect();
-
-  filter.frequency.setTargetAtTime(0, t + 0.01, 0.05);
-  return gain;
-}
-
-export function chime() {
-  let t = ctx.currentTime;
-  let gain = new GainNode(ctx, { gain: 0.2 });
-  gain.connect(masterGain);
-
-  let convolver = createReverb(2, 3);
-  convolver.connect(gain);
-
-  let hz = freq(randomElement(A_HARMONIC_MINOR));
-
-  let filter = new BiquadFilterNode(ctx, {
-    type: "lowpass",
-    frequency: hz,
-  });
-  filter.connect(gain);
-  filter.connect(convolver);
-
-  let osc = new OscillatorNode(ctx, {
-    frequency: filter.frequency.value,
-    type: "sine",
-  });
-  osc.connect(filter);
-  osc.start(t);
-  osc.stop(t + 5);
-  osc.onended = () => filter.disconnect();
-
-  filter.frequency.exponentialRampToValueAtTime(0.1, t + 1);
-  gain.gain.linearRampToValueAtTime(0.01, t + 5);
-  return gain;
-}
-
-export function ascending() {
-  let t = ctx.currentTime;
-
-  let gain = new GainNode(ctx);
-  gain.connect(masterGain);
-
-  let osc = new OscillatorNode(ctx, { type: "sine" });
-  osc.connect(gain);
-  osc.start();
-
-  A_HARMONIC_MINOR.forEach((step, index) => {
-    let time = t + index * 0.1;
-    osc.frequency.setValueAtTime(freq(step), time);
-    gain.gain.setValueAtTime(0.5, time);
-    gain.gain.setTargetAtTime(0, time + 0.19, 0.1);
-  });
-}
+let synth = Synth();
+synth.start();
+synth.enter();
 
 function createReverb(duration = 3, decay = 2) {
   let convolver = new ConvolverNode(ctx, {});
@@ -193,6 +121,7 @@ interface Synth {
   start(): void;
   enter(): void;
   exit(): void;
+  loopCallback(): void;
 }
 
 function Synth(): Synth {
@@ -217,15 +146,15 @@ function Synth(): Synth {
       osc.frequency.setValueAtTime(frequency, time);
     },
     start() {
-      osc.start();
-      this.enter();
+      startQueue.push(this);
     },
     enter() {
-      volume.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 1);
+      volume.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 5);
     },
     exit() {
-      volume.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 1);
+      volume.gain.linearRampToValueAtTime(0, ctx.currentTime + 2);
     },
+    loopCallback() {},
   };
 }
 
@@ -256,17 +185,6 @@ function Kick(): Synth {
   return synth;
 }
 
-function createDistortion() {
-  let amount = 1000000000;
-  let samples = 256;
-  let curve = new Float32Array(samples);
-  for (let i = 0; i < samples; ++i) {
-    let x = (i * 2) / samples - 1;
-    curve[i] = ((Math.PI + amount) * x) / (Math.PI + amount * Math.abs(x));
-  }
-  return new WaveShaperNode(ctx, { curve });
-}
-
 function Lead(): Synth {
   let synth = Synth();
   let convolver = createReverb(3, 1);
@@ -283,7 +201,6 @@ function Lead(): Synth {
 
 function sequence(pattern: number[], retune: number = 0, synth: Synth) {
   let time = ctx.currentTime;
-  let _resolve = () => {};
 
   function loop() {
     let looper = new OscillatorNode(ctx);
@@ -296,11 +213,13 @@ function sequence(pattern: number[], retune: number = 0, synth: Synth) {
       time += hold;
     }
     looper.stop(time);
-    looper.onended = loop;
+    looper.onended = () => {
+      loop();
+      synth.loopCallback();
+    }
   }
 
   loop();
-  return () => new Promise<void>(resolve => _resolve = resolve);
 }
 
 let init = false;
@@ -324,23 +243,13 @@ function createPattern(
   return pattern;
 }
 
-function harmonise(pattern: number[], interval = 3, scale = A_HARMONIC_MINOR): number[] {
-  return pattern.map((value, i) => {
-    if (i % 2) return value;
-    return scale[(scale.indexOf(value) + interval - 1) % 16];
-  });
-}
-
 function createBassline() {
   let a = createPattern(4, [E, Q], [A_HARMONIC_MINOR, A3, A3, A3, A3, A3].flat());
   let b = createPattern(4, [E, Q], A_HARMONIC_MINOR);
   let c = createPattern(4, [E, Q], A_HARMONIC_MINOR);
   let d = createPattern(4, [E, Q], [A3, A4, E3].flat());
-  let p = [
-    a, a, a, b,
-    a, a, a, d,
-  ].flat();
-  p = BASS_MELODY;
+  let p = [a, a, a, b].flat();
+  //p = BASS_MELODY;
   return p;
 }
 
@@ -373,23 +282,32 @@ function play() {
   ];
 
   sequence([A4, H, __, H], -36, synths.kick);
-  sequence([A4, H, A3, H], -36, synths.ambientOrgan);
+  sequence([A4, E, A3, E], -36, synths.ambientOrgan);
+  sequence(createLeadLine(), -12, synths.lead);
   sequence(createBassline(), -24, synths.bass);
-  sequence(createLeadLine(), 0, synths.lead);
-  sequence(kingsBass, -36, synths.kingsBass);
+  synths.kick.loopCallback = startQueuedSynths;
 
   {
-    // King's Organ
+    // King's Theme
     let p1 = [A4, H, B4, H, C4, H, B4, H];
     let p2 = [A4, H, B4, H, C4, H, D4, H];
     let p = [p1, p1, p1, p2].flat();
     sequence(p, 0, synths.kingsOrgan1);
     sequence(p, -12, synths.kingsOrgan2);
+    sequence(kingsBass, -36, synths.kingsBass);
   }
 
   let t = ctx.currentTime;
   masterGain.gain.linearRampToValueAtTime(0.5, t + 5);
   useLevelSynths();
+}
+
+function startQueuedSynths() {
+  for (let synth of startQueue) {
+    synth.osc.start();
+    synth.enter();
+  }
+  startQueue = [];
 }
 
 let normalLevelSynths: Synth[] = [synths.kick, synths.bass, synths.lead];
@@ -402,11 +320,16 @@ export function useShopSynths() {
 
 export function useLevelSynths() {
   if (game.level === 0) synths.ambientOrgan.start();
+  if (game.level === 0) startQueuedSynths();
   if (game.level === 1) synths.bass.start();
-  if (game.level === 3) synths.kick.start();
+  if (game.level === 2) synths.kick.start();
   if (game.level === 4) synths.lead.start();
-  let levelSynths = game.level < 9 ? normalLevelSynths : bossLevelSynths;
-  for (let synth of levelSynths) synth.enter();
+  if (game.level === 9) {
+    for (let synth of normalLevelSynths) synth.exit()
+    for (let synth of bossLevelSynths) synth.start()
+  } else {
+    for (let synth of normalLevelSynths) synth.enter();
+  }
 }
 
 document.body.addEventListener("click", () => {

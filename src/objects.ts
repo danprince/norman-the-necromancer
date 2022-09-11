@@ -1,6 +1,6 @@
 import * as sprites from "./sprites.json";
 import * as fx from "./fx";
-import * as sfx from "./sounds";
+//import * as sfx from "./sounds";
 import { Behaviour, GameObject } from "./game";
 import { BARRIER, CORPSE, LIVING, SPELL, MOBILE, PLAYER, UNDEAD } from "./tags";
 import { DEG_90, randomElement } from "./helpers";
@@ -146,6 +146,7 @@ export function TheKing() {
       unit.removeBehaviour(invulnerable);
       unit.removeBehaviour(summons);
       marching.step *= -1;
+      //sfx.synths.kick.enter();
     }
   };
 
