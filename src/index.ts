@@ -1,12 +1,12 @@
 import { init, updateParticles, updateTweens } from "./engine";
-import { Game, PLAYING, SHOPPING } from "./game";
+import { Game, PLAYING } from "./game";
 import { render, screenToSceneCoords } from "./renderer";
 import { Cast, Resurrect } from "./actions";
 import { angleBetweenPoints } from "./helpers";
 import { Player } from "./objects";
 import { isLevelFinished, updateLevel } from "./levels";
-import { Bleed, Bouncing, Broken, Ceiling, Doom, Drunkard, Explosive, Homing, Knockback, Meteoric, Pact, Piercing, Rain, Seance, SplitOnBounce, Splitshot, Streak, Triggerfinger, Weightless } from "./rituals";
-import { buy, enterShop, restockShop, selectShopIndex, shop } from "./shop";
+import { Bleed, Bouncing, Broken, Ceiling, Doom, Drunkard, Explosive, Homing, Knockback, Meteoric, Pact, Rain, Seance, SplitOnBounce, Splitshot, Streak, Triggerfinger, Weightless } from "./rituals";
+import { buy, enterShop, selectShopIndex, shop } from "./shop";
 
 let player = Player();
 let game = new Game(player);
