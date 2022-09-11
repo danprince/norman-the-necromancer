@@ -86,6 +86,9 @@ export class GameObject {
   }
 
   addBehaviour(behaviour: Behaviour = new Behaviour(this)): Behaviour {
+    let { constructor } = Object.getPrototypeOf(behaviour);
+    if (constructor !== Behaviour && this.getBehaviour(constructor)) return behaviour;
+
     this.behaviours.push(behaviour);
     behaviour.onAdded();
     return behaviour;
