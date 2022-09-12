@@ -3,9 +3,9 @@ import { Game, PLAYING } from "./game";
 import { render, screenToSceneCoords } from "./renderer";
 import { Cast, Resurrect } from "./actions";
 import { angleBetweenPoints } from "./helpers";
-import { Player } from "./objects";
+import { BleedSpell, IceSpell, LightningSpell, Player, Skeleton, Spell } from "./objects";
 import { isLevelFinished, updateLevel } from "./levels";
-import { Bleed, Bouncing, Broken, Ceiling, Doom, Drunkard, Explosive, Homing, Knockback, Meteoric, Pact, Rain, Seance, SplitOnBounce, Splitshot, Streak, Triggerfinger, Weightless } from "./rituals";
+import { Benefactor, Bleed, Bouncing, Broken, Ceiling, Drunkard, Explosive, Extraction, Freeze, Homing, Knockback, Meteoric, Pact, Rain, Seance, SplitOnBounce, Splitshot, Streak, Triggerfinger, Weightless, Zap } from "./rituals";
 import { buy, enterShop, selectShopIndex, shop } from "./shop";
 
 let player = Player();
@@ -50,11 +50,13 @@ function update(dt: number) {
   updateParticles(dt);
 
   if (game.state === PLAYING && isLevelFinished()) {
+    game.onLevelEnd();
     enterShop();
   }
 }
 
 game.addRitual(Streak);
+game.addRitual(Zap);
 
 shop.rituals = [
   Ceiling,
@@ -65,9 +67,6 @@ shop.rituals = [
   Splitshot,
   Homing,
   Weightless,
-  Doom,
-  // Piercing is way too strong
-  //Piercing,
   Knockback,
   Drunkard,
   Pact,
@@ -76,6 +75,8 @@ shop.rituals = [
   Meteoric,
   Triggerfinger,
   Bleed,
+  Extraction,
+  Benefactor,
 ];
 
 init(game.stage.width, game.stage.height, update);

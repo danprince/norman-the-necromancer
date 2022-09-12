@@ -1,10 +1,10 @@
 import * as sprites from "./sprites.json";
 import * as fx from "./fx";
 //import * as sfx from "./sounds";
-import { Behaviour, GameObject } from "./game";
+import { Behaviour, Game, GameObject } from "./game";
 import { BARRIER, CORPSE, LIVING, SPELL, MOBILE, PLAYER, UNDEAD } from "./tags";
-import { DEG_90, randomElement } from "./helpers";
-import { March, Attack, Damaging, Bleeding, Enraged, Summon, Invulnerable, DespawnTimer } from "./behaviours";
+import { angleBetweenPoints, clamp, DEG_180, DEG_90, distance, randomElement, randomInt } from "./helpers";
+import { March, Attack, Damaging, Bleeding, Enraged, Summon, Invulnerable, DespawnTimer, Seeking, Frozen } from "./behaviours";
 import { Damage, Die } from "./actions";
 import { tween } from "./engine";
 
@@ -38,17 +38,66 @@ export function Spell() {
   let object = new GameObject();
   object.sprite = sprites.p_green_skull;
   object.tags = SPELL;
-  object.collisionMask = MOBILE;
+  object.collisionMask = MOBILE | LIVING;
   object.mass = 100;
   object.emitter = fx.trail();
   object.friction = 0.1;
   object.despawnOnCollision = true;
   object.despawnOnBounce = true;
   object.addBehaviour(new Damaging(object));
-  //let sounds = object.addBehaviour();
-  //sounds.onBounce = sfx.pluck;
-  //sounds.onCollision = sfx.chime;
   return object;
+}
+
+export function BleedSpell() {
+  let spell = Spell();
+  spell.sprite = sprites.p_red_skull;
+  spell.emitter!.extend({
+    variants: [
+      [sprites.p_red_3, sprites.p_red_2, sprites.p_red_1],
+      [sprites.p_red_4, sprites.p_red_3, sprites.p_red_2],
+      [sprites.p_red_3, sprites.p_red_2, sprites.p_red_1],
+    ],
+    frequency: 5,
+    angle: [DEG_180, 0],
+    mass: [20, 50],
+  });
+  spell.addBehaviour().onCollision = target =>
+    target.addBehaviour(new Bleeding(target));
+  return spell;
+}
+
+export function IceSpell() {
+  let spell = Spell();
+  spell.sprite = sprites.p_skull;
+  spell.emitter!.extend({
+    variants: [
+      [sprites.p_ice_1, sprites.p_ice_2, sprites.p_ice_3],
+      [sprites.p_purple_3, sprites.p_purple_2, sprites.p_purple_1],
+      [sprites.p_purple_3, sprites.p_purple_2, sprites.p_purple_1],
+    ],
+    frequency: 5,
+    angle: [DEG_180, 0],
+    mass: [0, 25],
+  });
+  spell.removeBehaviour(spell.getBehaviour(Damaging)!);
+  spell.addBehaviour().onCollision = target => {
+    target.addBehaviour(new Frozen(target), 0);
+  }
+  return spell;
+}
+
+export function LightningSpell() {
+  let spell = Spell();
+  spell.sprite = sprites.p_skull_yellow;
+  spell.emitter!.frequency = 0.8;
+  spell.emitter!.variants = [
+    [sprites.p_lightning_1, sprites.p_lightning_2, sprites.p_lightning_3, sprites.p_lightning_4],
+    [sprites.p_lightning_1, sprites.p_lightning_2, sprites.p_lightning_3, sprites.p_lightning_5],
+    [sprites.p_lightning_2, sprites.p_lightning_3, sprites.p_lightning_6],
+    [sprites.p_lightning_4, sprites.p_lightning_5, sprites.p_lightning_6],
+    [sprites.p_purple_5],
+  ];
+  return spell;
 }
 
 export function Skeleton() {
@@ -86,7 +135,7 @@ export function Villager() {
   unit.hp = unit.maxHp = 1;
   unit.updateSpeed = 600;
   unit.addBehaviour(new March(unit, -16));
-  unit.corpseChance = 0.5;
+  unit.corpseChance = 1;
   unit.souls = 5;
   return unit;
 }
@@ -356,7 +405,30 @@ export function RoyalGuardOrb() {
 export function Wizard() {
   let unit = Villager();
   unit.sprite = sprites.wizard;
-  unit.hp = unit.maxHp = 3;
+  unit.hp = unit.maxHp = 5;
   unit.souls = 30;
+  unit.addBehaviour(new Summon(unit, Portal, 3000));
+  return unit;
+}
+
+export function Portal() {
+  let unit = new GameObject();
+  unit.sprite = sprites.portal;
+  unit.tags = LIVING;
+  unit.hp = unit.maxHp = 3;
+  // Prevent the player from farming portals for souls
+  unit.addBehaviour(new DespawnTimer(unit, 3000 * 10));
+  unit.addBehaviour(
+    new Summon(unit, () => randomElement([Villager, Bandit, Archer])(), 3000),
+  );
+
+  unit.emitter = fx.cloud(unit.bounds(), [
+    [sprites.p_blue_1, sprites.p_blue_2, sprites.p_blue_3],
+    [sprites.p_blue_2, sprites.p_blue_3],
+    [sprites.p_blue_3],
+  ]).extend({
+    frequency: 0.2,
+  });
+
   return unit;
 }

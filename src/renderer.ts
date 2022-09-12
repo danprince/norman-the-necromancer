@@ -1,8 +1,9 @@
 import * as sprites from "./sprites.json";
-import { canvas, clear, ctx, drawSceneSprite, drawSprite, particleEmitters, Sprite, write } from "./engine";
-import { Point, randomInt } from "./helpers";
+import { canvas, clear, ctx, drawNineSlice, drawSceneSprite, drawSprite, particleEmitters, Sprite, write } from "./engine";
+import { clamp, Point, randomInt } from "./helpers";
 import { SHOPPING } from "./game";
 import { shop } from "./shop";
+import { Frozen } from "./behaviours";
 
 const ICON_SOULS = "$";
 
@@ -79,16 +80,16 @@ function drawHud() {
   let bonus = multiplier ? `(+${multiplier * 100 + "%"})` : "";
   write(`${ICON_SOULS}${souls} ${bonus}`, canvas.width / 2 - 30, 0);
 
-  let timer = game.ability.timer / 1000 | 0;
-  let cooldown = game.ability.cooldown / 1000 | 0;
-  let x = canvas.width - cooldown * 4 - 5;
-
-  for (let i = 0; i < cooldown; i++) {
-    let sprite = i < timer ? sprites.white_orb : sprites.white_orb_empty;
-    drawSprite(sprite, x + i * 4, 0);
+  {
+    let x = 1;
+    let y = canvas.height - 12;
+    let progress = clamp(game.ability.timer / game.ability.cooldown, 0, 1);
+    drawNineSlice(sprites.pink_frame, x, y, 52 * (1 - progress) | 0, 10);
+    write("Resurrect", x + 10, y + 2);
+    if (progress === 1) write(" (SPC)");
+    else write(" " + (((1 - progress) * game.ability.cooldown) / 1000 | 0) + "s");
+    drawSprite(sprites.skull, x + 1, y + 1);
   }
-
-  write("Resurrect", x - 3, 6);
 }
 
 function drawOrbs(
@@ -109,14 +110,18 @@ function drawObjects() {
   for (let object of game.objects) {
     drawSceneSprite(object.sprite, object.x, object.y + object.hop);
 
-    if (object.maxHp === 1 || object === game.player) continue;
+    if (object.getBehaviour(Frozen)) {
+      drawNineSlice(sprites.ice, object.x, -object.sprite[3], object.sprite[2], object.sprite[3]);
+    }
 
-    if (object.maxHp < 10) {
-      let { x } = object.center();
-      drawOrbs(x, -6, object.hp, object.maxHp, sprites.health_orb, sprites.health_orb_empty);
-    } else {
-      drawSceneSprite(sprites.health_orb, object.x, -6);
-      write(`${object.hp}/${object.maxHp}`, object.x + 6, 0);
+    if (object.maxHp > 1 && object !== game.player) {
+      if (object.maxHp < 10) {
+        let { x } = object.center();
+        drawOrbs(x, -6, object.hp, object.maxHp, sprites.health_orb, sprites.health_orb_empty);
+      } else {
+        drawSceneSprite(sprites.health_orb, object.x, -6);
+        write(`${object.hp}/${object.maxHp}`, object.x + 6, 0);
+      }
     }
 
     let { x } = object;

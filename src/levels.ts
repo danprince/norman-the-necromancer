@@ -68,8 +68,8 @@ const LEVELS = [
 
   // Level 2
   2, ARCHER, 4, VILLAGER, END_OF_WAVE,
-  4, ARCHER, END_OF_WAVE,
-  8, VILLAGER, 4, ARCHER, END_OF_WAVE,
+  3, ARCHER, 4, VILLAGER, END_OF_WAVE,
+  8, VILLAGER, 2, ARCHER, END_OF_WAVE,
   1, CHAMPION, END_OF_LEVEL,
 
   // Level 3
@@ -97,7 +97,7 @@ const LEVELS = [
   4, BANDIT, 1, CHAMPION, 2, ARCHER, END_OF_WAVE,
   1, RAGE_KNIGHT, 4, BANDIT, END_OF_WAVE,
   3, RAGE_KNIGHT, END_OF_WAVE,
-  3, WIZARD, END_OF_LEVEL,
+  1, WIZARD, END_OF_LEVEL,
 
   // Level 7 - Angry Mob
   20, MOB, 1, RAGE_KNIGHT, 20, MOB, 1, RAGE_KNIGHT, 20, MOB, END_OF_WAVE,
@@ -118,8 +118,7 @@ const LEVELS = [
   10, ROYAL_GUARD, END_OF_WAVE,
   10, ROYAL_GUARD, 2, MONK, 10, ROYAL_GUARD, END_OF_WAVE,
   1, SHELL_KNIGHT, 2, ROYAL_GUARD, 1, CHAMPION, 1, MONK, END_OF_WAVE,
-  1, SHELL_KNIGHT, 2, ROYAL_GUARD, 1, CHAMPION, 1, MONK, END_OF_WAVE,
-  END_OF_LEVEL,
+  1, SHELL_KNIGHT, 2, ROYAL_GUARD, 1, CHAMPION, 1, MONK, END_OF_LEVEL,
 
   // Level 10 - The King (Boss Fight)
   1, THE_KING, END_OF_LEVEL,
@@ -135,6 +134,7 @@ export function isLevelFinished() {
 export let nextLevel = () => {
   cursor++;
   game.level++;
+  game.onLevelStart();
 };
 
 export function updateLevel(dt: number) {

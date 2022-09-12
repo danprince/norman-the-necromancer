@@ -85,11 +85,11 @@ export class GameObject {
     }
   }
 
-  addBehaviour(behaviour: Behaviour = new Behaviour(this)): Behaviour {
+  addBehaviour(behaviour: Behaviour = new Behaviour(this), index = this.behaviours.length): Behaviour {
     let { constructor } = Object.getPrototypeOf(behaviour);
     if (constructor !== Behaviour && this.getBehaviour(constructor)) return behaviour;
 
-    this.behaviours.push(behaviour);
+    this.behaviours.splice(index, 0, behaviour);
     behaviour.onAdded();
     return behaviour;
   }
@@ -217,6 +217,9 @@ export interface Ritual {
   onResurrect?(): void;
   onResurrection?(object: GameObject): void;
   onDeath?(death: Death): void;
+  onLevelEnd?(): void;
+  onLevelStart?(): void;
+  onShopEnter?(): void;
 }
 
 export const PLAYING = 0;
@@ -256,7 +259,7 @@ export class Game {
     shotsPerRound: 1,
     shotOffsetAngle: 0.1,
     maxCasts: 3,
-    casts: 3,
+    casts: 0,
     castRechargeRate: 1000,
     castRechargeTimer: 0,
   };
@@ -395,6 +398,24 @@ export class Game {
           }
         }
       }
+    }
+  }
+
+  onLevelStart() {
+    for (let ritual of game.rituals) {
+      ritual.onLevelStart?.();
+    }
+  }
+
+  onLevelEnd() {
+    for (let ritual of game.rituals) {
+      ritual.onLevelEnd?.();
+    }
+  }
+
+  onShopEnter() {
+    for (let ritual of game.rituals) {
+      ritual.onShopEnter?.();
     }
   }
 

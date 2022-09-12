@@ -5,7 +5,8 @@ import { tween } from "./engine";
 import { Behaviour, Death, GameObject, MAX_STREAK } from "./game";
 import { screenshake } from "./renderer";
 import type { Damage as Dmg } from "./game";
-import { distance, vectorToAngle, angleBetweenPoints, vectorFromAngle, clamp } from "./helpers";
+import { distance, vectorToAngle, angleBetweenPoints, vectorFromAngle, clamp, randomInt } from "./helpers";
+import { LightningSpell } from "./objects";
 
 export class Attack extends Behaviour {
   onCollision(target: GameObject): void {
@@ -87,28 +88,6 @@ export class Bleeding extends Behaviour {
   }
 }
 
-export class Doomed extends Behaviour {
-  override sprite = sprites.status_doomed;
-  override turns = 1;
-
-  emitter = fx.cloud({ x: 0, y: 0, w: 0, h: 0 }, [
-    [sprites.p_purple_3, sprites.p_purple_2, sprites.p_purple_1],
-    [sprites.p_purple_4, sprites.p_purple_3, sprites.p_purple_2],
-    [sprites.p_purple_3, sprites.p_purple_2, sprites.p_purple_1],
-  ]).extend({
-    mass: [-10, -30],
-    frequency: 0,
-  });
-
-  override onDeath(death: Death) {
-    death.object.corpseChance &&= 1;
-  }
-
-  override onUpdate(): boolean | void {
-    this.emitter.extend(this.object.bounds()).burst(10);
-  }
-}
-
 export class Enraged extends Behaviour {
   override sprite = sprites.status_enraged;
 
@@ -153,7 +132,7 @@ export class Seeking extends Behaviour {
     if (target) {
       let currentAngle = vectorToAngle(projectile.vx, projectile.vy);
       let desiredAngle = angleBetweenPoints(projectile, target.center());
-      let angle = currentAngle + (desiredAngle - currentAngle) / 4;
+      let angle = currentAngle + (desiredAngle - currentAngle) / 20;
       let magnitude = Math.hypot(projectile.vx, projectile.vy);
       let [vx, vy] = vectorFromAngle(angle);
       projectile.vx = vx * magnitude;
@@ -220,5 +199,32 @@ export class Invulnerable extends Behaviour {
 
   onDamage(damage: Dmg): void {
     if (damage.amount > 0) damage.amount = 0;
+  }
+}
+
+export class Frozen extends Behaviour {
+  freezeTimer = 10;
+
+  onUpdate() {
+    if (this.freezeTimer-- <= 0) {
+      this.object.removeBehaviour(this);
+    }
+
+    return true;
+  }
+}
+
+export class LightningStrike extends Behaviour {
+  onCollision(target: GameObject): void {
+    let bolts = 3;
+    for (let i = 0; i < bolts; i++) {
+      let bolt = LightningSpell();
+      //bolt.addBehaviour(new Seeking(bolt));
+      bolt.vy = -200;
+      bolt.vx = randomInt(20) - 10;
+      bolt.y = clamp(50 + randomInt(100), 0, game.stage.ceiling);
+      bolt.x = target.x + randomInt(50) - 25;
+      game.spawn(bolt);
+    }
   }
 }

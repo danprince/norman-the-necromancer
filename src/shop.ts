@@ -32,6 +32,7 @@ export function selectShopIndex(step: number) {
 export function enterShop() {
   game.state = SHOPPING;
   restockShop();
+  game.onShopEnter();
   //sfx.useShopSynths();
 }
 
@@ -42,13 +43,18 @@ export function exitShop() {
 }
 
 export function restockShop() {
+  let exp = Math.pow(game.level + 1, 2);
   let items: (ShopItem | false)[] = [
-    game.player.hp < game.player.maxHp && ShopItem(10, "Heal", `Heal 1*`, () => Damage(game.player, -1)),
-    ShopItem(100, "Revive", `+1* max hp`, () => {
+    game.player.hp < game.player.maxHp &&
+      ShopItem(10 * game.level, "Heal", `Heal 1*`, () => Damage(game.player, -1)),
+
+    ShopItem(10 * exp, "Revive", `+1* max hp`, () => {
       game.player.maxHp++;
       game.player.hp++;
     }),
-    ShopItem(10, "Charge", "+1\x7F max casts", () => game.spell.maxCasts++),
+
+    ShopItem(10 * exp, "Charge", "+1\x7F max casts", () => game.spell.maxCasts++),
+
     ...createRitualItems(),
     ShopItem(0, "Continue", "Begin the next level", () => exitShop()),
   ];

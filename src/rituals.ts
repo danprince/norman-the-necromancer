@@ -1,13 +1,14 @@
 import * as fx from "./fx";
 import * as sprites from "./sprites.json";
 import { Damage } from "./actions";
-import { Bleeding, Damaging, DespawnTimer, Doomed, HitStreak, Seeking } from "./behaviours";
+import { Bleeding, Damaging, DespawnTimer, HitStreak, LightningStrike, Seeking } from "./behaviours";
 import { tween } from "./engine";
 import { Behaviour, GameObject, RARE, Ritual } from "./game";
 import { angleBetweenPoints, clamp, DEG_180, DEG_360, DEG_90, distance, randomInt, vectorFromAngle } from "./helpers";
 import { SkeletonLord, Spell, WardStone } from "./objects";
 import { screenshake } from "./renderer";
-import { LIVING, UNDEAD } from "./tags";
+import { CORPSE, LIVING, UNDEAD } from "./tags";
+import { shop } from "./shop";
 
 /*
 - Every nth shot
@@ -343,34 +344,65 @@ export let Bleed: Ritual = {
   }
 };
 
-export let Doom: Ritual = {
-  tags: CURSE,
-  name: "Doom",
-  description: "Doomed targets always leave corpses",
-  onCast(spell: GameObject) {
-    spell.sprite = sprites.p_skull;
-    spell.emitter!.extend({
-      variants: [
-        [sprites.p_purple_1, sprites.p_purple_2, sprites.p_purple_3],
-        [sprites.p_purple_2, sprites.p_purple_3, sprites.p_purple_4],
-        [sprites.p_purple_1, sprites.p_purple_2, sprites.p_purple_3],
-      ],
-      frequency: 2,
-      angle: [DEG_90, 0],
-      mass: [-10, -20],
-    });
-    let inflict = spell.addBehaviour();
-    inflict.onCollision = target => {
-      target.addBehaviour(new Doomed(target));
-    };
-  }
-};
-
 export let BigFred: Ritual = {
   tags: NONE,
   name: "Big Fred",
   description: "Summon Norman's Neighbour each resurrection",
   onResurrect() {
     game.spawn(SkeletonLord(), game.player.x, game.player.y);
+  },
+};
+
+export let Extraction: Ritual = {
+  tags: NONE,
+  rarity: RARE,
+  name: "Extraction",
+  description: "Corpses become souls at the end of each level",
+  onLevelEnd() {
+    let corpses = game.objects.filter(object => object.is(CORPSE));
+
+    for (let corpse of corpses) {
+      let emitter = fx.bones().extend({
+        ...corpse.center(),
+        variants: [[sprites.p_green_skull]],
+        duration: [100, 1000],
+      });
+      emitter.burst(5);
+      emitter.remove();
+      game.despawn(corpse);
+      game.addSouls(5);
+    }
+  },
+};
+
+export let Benefactor: Ritual = {
+  tags: NONE,
+  rarity: RARE,
+  name: "Benefactor",
+  description: "Necronomicon upgrades are 50% cheaper",
+  onShopEnter() {
+    for (let item of shop.items) {
+      item.cost = item.cost / 2 | 0;
+    }
+  },
+};
+
+export let Zap: Ritual = {
+  tags: NONE,
+  rarity: RARE,
+  name: "Zap",
+  description: "Lightning strikes after hits",
+  onCast(spell) {
+    spell.addBehaviour(new LightningStrike(spell));
+  },
+};
+
+export let Freeze: Ritual = {
+  tags: NONE,
+  rarity: RARE,
+  name: "Freeze",
+  description: "Small chance to freeze enemies",
+  onCast(spell) {
+    spell.addBehaviour(new LightningStrike(spell));
   },
 };
