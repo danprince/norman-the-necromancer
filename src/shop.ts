@@ -2,6 +2,7 @@ import { Damage } from "./actions";
 import { PLAYING, RARE, Ritual, ShopItem, SHOPPING } from "./game";
 import { clamp, randomInt, removeFromArray, shuffled } from "./helpers";
 import { nextLevel } from "./levels";
+import { useLevelSynths, useShopSynths } from "./sounds";
 
 export interface Shop {
   rituals: Ritual[];
@@ -33,13 +34,13 @@ export function enterShop() {
   game.state = SHOPPING;
   restockShop();
   game.onShopEnter();
-  //sfx.useShopSynths();
+  useShopSynths();
 }
 
 export function exitShop() {
   game.state = PLAYING;
   nextLevel();
-  //sfx.useLevelSynths();
+  useLevelSynths();
 }
 
 export function restockShop() {

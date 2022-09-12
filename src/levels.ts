@@ -131,6 +131,16 @@ export function isLevelFinished() {
   return LEVELS[cursor] === END_OF_LEVEL && isCleared();
 }
 
+export function isComplete() {
+  return cursor >= LEVELS.length - 1;
+}
+
+export function newGamePlus() {
+  cursor = 0;
+  game.level = 0;
+  game.newGame++;
+}
+
 export let nextLevel = () => {
   cursor++;
   game.level++;

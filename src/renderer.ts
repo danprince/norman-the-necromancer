@@ -1,7 +1,7 @@
 import * as sprites from "./sprites.json";
 import { canvas, clear, ctx, drawNineSlice, drawSceneSprite, drawSprite, particleEmitters, Sprite, write } from "./engine";
 import { clamp, Point, randomInt } from "./helpers";
-import { SHOPPING } from "./game";
+import { INTRO, PLAYING, SHOPPING } from "./game";
 import { shop } from "./shop";
 import { Frozen } from "./behaviours";
 
@@ -35,7 +35,7 @@ export function render(dt: number) {
   drawBackground();
   drawParticles();
   drawObjects();
-  drawReticle();
+  if (game.state === PLAYING) drawReticle();
   ctx.restore();
 
   drawHud();
@@ -63,6 +63,12 @@ function drawShop() {
 }
 
 function drawHud() {
+  if (game.dialogue.length) {
+    write(game.dialogue[0], 75, 50);
+  }
+
+  if (game.state === INTRO) return;
+
   drawSprite(sprites.norman_icon, 0, 0);
 
   for (let i = 0; i < game.player.maxHp; i++) {
@@ -76,18 +82,20 @@ function drawHud() {
   }
 
   let souls = game.souls | 0;
-  let multiplier = game.getStreakMultiplier();
-  let bonus = multiplier ? `(+${multiplier * 100 + "%"})` : "";
-  write(`${ICON_SOULS}${souls} ${bonus}`, canvas.width / 2 - 30, 0);
+  if (souls) {
+    let multiplier = game.getStreakMultiplier();
+    let bonus = multiplier ? `(+${multiplier * 100 + "%"})` : "";
+    write(`${ICON_SOULS}${souls} ${bonus}`, canvas.width / 2 - 30, 0);
+  }
 
-  {
-    let x = 1;
+  if (game.state === PLAYING) {
+    let x = 150;
     let y = canvas.height - 12;
     let progress = clamp(game.ability.timer / game.ability.cooldown, 0, 1);
     drawNineSlice(sprites.pink_frame, x, y, 52 * (1 - progress) | 0, 10);
     write("Resurrect", x + 10, y + 2);
-    if (progress === 1) write(" (SPC)");
-    else write(" " + (((1 - progress) * game.ability.cooldown) / 1000 | 0) + "s");
+    if (progress === 1) write(" (Space)");
+    else write(" (" + (((1 - progress) * game.ability.cooldown) / 1000 | 0) + "s)");
     drawSprite(sprites.skull, x + 1, y + 1);
   }
 }
@@ -136,7 +144,8 @@ function drawObjects() {
 
 function drawBackground() {
   for (let i = 0; i < game.stage.width / 16; i++) {
-    drawSceneSprite(sprites.wall, i * 16, 0);
+    let sprite = i % 5 ? sprites.wall : sprites.door;
+    drawSceneSprite(sprite, i * 16, 0);
     drawSceneSprite(sprites.floor, i * 16, -sprites.floor[3]);
     drawSceneSprite(sprites.ceiling, i * 16, game.stage.ceiling);
   }

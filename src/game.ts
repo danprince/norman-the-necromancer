@@ -222,9 +222,12 @@ export interface Ritual {
   onShopEnter?(): void;
 }
 
-export const PLAYING = 0;
-export const SHOPPING = 1;
-export type State = typeof PLAYING | typeof SHOPPING;
+export const INTRO = 0;
+export const PLAYING = 1;
+export const SHOPPING = 2;
+export const LOSE = 3;
+export const WIN = 4;
+export type State = typeof INTRO | typeof PLAYING | typeof SHOPPING | typeof LOSE | typeof WIN;
 
 export interface ShopItem {
   cost: number;
@@ -247,10 +250,12 @@ export class Game {
   objects: GameObject[] = [];
   player: GameObject = undefined!;
   rituals: Ritual[] = [];
-  state: State = PLAYING;
+  state: State = INTRO;
   souls: number = 0;
   streak: number = 0;
   level: number = 0;
+  newGame: number = 0;
+  dialogue: string[] = [];
 
   spell: Spell = {
     targetAngle: 0,
@@ -266,7 +271,7 @@ export class Game {
 
   ability: Ability = {
     cooldown: 10_000,
-    timer: 0,
+    timer: 10_000,
   };
 
   constructor(player: GameObject) {

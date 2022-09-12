@@ -1,11 +1,11 @@
 import * as fx from "./fx";
 import * as sprites from "./sprites.json";
 import { Damage } from "./actions";
-import { Bleeding, Damaging, DespawnTimer, HitStreak, LightningStrike, Seeking } from "./behaviours";
+import { Bleeding, Damaging, DespawnTimer, Frozen, HitStreak, LightningStrike, Seeking } from "./behaviours";
 import { tween } from "./engine";
 import { Behaviour, GameObject, RARE, Ritual } from "./game";
-import { angleBetweenPoints, clamp, DEG_180, DEG_360, DEG_90, distance, randomInt, vectorFromAngle } from "./helpers";
-import { SkeletonLord, Spell, WardStone } from "./objects";
+import { angleBetweenPoints, clamp, DEG_180, DEG_360, DEG_90, distance, randomFloat, randomInt, vectorFromAngle } from "./helpers";
+import { SkeletonLord, Spell } from "./objects";
 import { screenshake } from "./renderer";
 import { CORPSE, LIVING, UNDEAD } from "./tags";
 import { shop } from "./shop";
@@ -53,7 +53,7 @@ const BOUNCING = 1 << 0;
 const SPLITTING = 1 << 1;
 const EXPLOSIVE = 1 << 2;
 const HOMING = 1 << 3;
-const MAX_CASTS = 1 << 4;
+const WARDSTONES = 1 << 4;
 const CASTING_RATE = 1 << 5;
 const CURSE = 1 << 6;
 
@@ -300,18 +300,6 @@ export let Broken: Ritual = {
   }
 };
 
-export let Meteoric: Ritual = {
-  tags: NONE,
-  name: "Meteoric",
-  description: "Wardstones drop from above on resurrection",
-  onResurrect() {
-    let object = WardStone();
-    let x = Math.random() * game.stage.width;
-    let y = game.stage.ceiling;
-    game.spawn(object, x, y);
-  }
-};
-
 export let Triggerfinger: Ritual = {
   tags: CASTING_RATE,
   name: "Triggerfinger",
@@ -403,6 +391,8 @@ export let Freeze: Ritual = {
   name: "Freeze",
   description: "Small chance to freeze enemies",
   onCast(spell) {
-    spell.addBehaviour(new LightningStrike(spell));
+    if (randomFloat() < 0.1) {
+      spell.addBehaviour().onCollision = target => target.addBehaviour(new Frozen(target));
+    }
   },
 };

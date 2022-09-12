@@ -61,7 +61,7 @@ const G5 = 22;
 const ORGAN = [-0.8, 1, 0.8, 0.8, -0.8, -0.8, -1];
 
 // Tempo
-const BPM = 240;
+export const BPM = 240;
 
 const A_HARMONIC_MINOR = [
   A3, B3, C3, D3, F3, E3, Ab4, A4,
@@ -149,10 +149,10 @@ function Synth(): Synth {
       startQueue.push(this);
     },
     enter() {
-      volume.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 5);
+      volume.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 1);
     },
     exit() {
-      volume.gain.linearRampToValueAtTime(0, ctx.currentTime + 2);
+      volume.gain.linearRampToValueAtTime(0, ctx.currentTime + 1);
     },
     loopCallback() {},
   };
@@ -254,10 +254,12 @@ function createBassline() {
 }
 
 function createLeadLine() {
-  let a = createPattern(1, [E, E, Q], [...A_HARMONIC_MINOR, A4, A4, A3, A3, E4, E4, A4, A4]);
-  let b = createPattern(1, [E, Q], [...A_HARMONIC_MINOR, A4, A4, A3, A3, E4, E4, A4, A4]);
-  let c = createPattern(4, [W], [__]);
-  return [a, a, c, b, b, c, a, b, c].flat();
+  //let a = createPattern(4, [E], [A3, A4, __]);
+  //let b = createPattern(4, [E, Q], [A3, A4, __]);
+  //return [a, b, a, b].flat();
+  let a = [A3, E, __, E, A3, E, __, E];
+  let b = [E3, Q, A3, E, E3, E, __, E, A3, E, E3, E, __, E];
+  return [a, a, b].flat();
 }
 
 export let synths = {
@@ -265,12 +267,12 @@ export let synths = {
   ambientOrgan: Organ(6, 1),
   lead: Organ(2, 0.5),
   bass: Lead(),
-  kingsOrgan1: Organ(1, 1),
-  kingsOrgan2: Organ(1, 1),
+  kingsOrgan1: Organ(3, 0.25),
+  kingsOrgan2: Organ(3, 1),
   kingsBass: Organ(),
 };
 
-function play() {
+export function play() {
   if (init) return;
   init = true;
 
@@ -331,7 +333,3 @@ export function useLevelSynths() {
     for (let synth of normalLevelSynths) synth.enter();
   }
 }
-
-document.body.addEventListener("click", () => {
-  play();
-});

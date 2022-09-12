@@ -1,6 +1,6 @@
 import * as sprites from "./sprites.json";
 import * as fx from "./fx";
-//import * as sfx from "./sounds";
+import * as sfx from "./sounds";
 import { Behaviour, Game, GameObject } from "./game";
 import { BARRIER, CORPSE, LIVING, SPELL, MOBILE, PLAYER, UNDEAD } from "./tags";
 import { angleBetweenPoints, clamp, DEG_180, DEG_90, distance, randomElement, randomInt } from "./helpers";
@@ -180,8 +180,9 @@ export function TheKing() {
       unit.addBehaviour(invulnerable);
       marching.step *= -1;
     } else if (phase === 3 && willDie) {
+      sfx.synths.kick.enter();
       phase = 4;
-      unit.hp = unit.maxHp = unit.maxHp / 2;
+      unit.hp = unit.maxHp;
       unit.sprite = sprites.the_king_on_foot;
       unit.updateSpeed = unit.updateClock = 1000;
       marching.step /= 2;
@@ -195,7 +196,6 @@ export function TheKing() {
       unit.removeBehaviour(invulnerable);
       unit.removeBehaviour(summons);
       marching.step *= -1;
-      //sfx.synths.kick.enter();
     }
   };
 
@@ -288,39 +288,6 @@ export function Rat() {
   unit.updateSpeed = 200;
   unit.souls = 1;
   unit.corpseChance = 0;
-  return unit;
-}
-
-export function WardStone() {
-  let unit = new GameObject();
-  unit.sprite = sprites.wardstone;
-  unit.hp = unit.maxHp = 5;
-  unit.tags = BARRIER;
-  unit.collisionMask = LIVING;
-  unit.mass = 1000;
-  unit.onCollision = object => {
-    Damage(unit, 1);
-    tween(object.x, object.x + 16, 200, x => object.x = x);
-  }
-  return unit;
-}
-
-export function Chariot() {
-  let unit = new GameObject();
-  //unit.sprite = sprites.chariot;
-  unit.tags = UNDEAD | MOBILE;
-  unit.collisionMask = LIVING;
-  unit.hp = unit.maxHp = 20;
-  unit.updateSpeed = 100;
-  unit.behaviours.push(new March(unit, 32));
-  unit.behaviours.push(new Attack(unit));
-  unit.emitter = fx.bones().extend({
-    h: 16,
-    frequency: 0.5,
-    duration: [1000, 2000],
-    angle: [DEG_90, 0.5],
-    velocity: [20, 20],
-  });
   return unit;
 }
 

@@ -292,8 +292,44 @@ Plans for the weekend.
 - [ ] Make resurrection a viable way to play
 - [ ] Make wardstones a legit mechanic
 - [ ] Figure out behaviour stacking
-- [ ] Experiement with behaviours as simple objects
+- [ ] Experiment with behaviours as simple objects
 - [ ] Add keyboard controls
 
 ## Day 21
 After beating the king, use a NG+ cycle which restarts the game at the beginning, but adds some buffs to enemies. It would be nice to change spawn patterns too, but might be annoying to implement.
+
+## Day 22
+Sound effects:
+- Cast a spell
+- Spell collision
+- Resurrection
+- Explosion
+
+- [x] King needs to clear behaviours when he enters second form
+- [x] Big Fred is too slow
+- [x] Champ is too tanky/slow
+- [x] Red guys are not fun
+- [ ] Some rituals could be bought multiple times
+- [x] Experiment with windows and sky color
+- [ ] SFX for menu
+- [x] Ritual hooks for level end/start/shop
+- [x] Bleed is too strong when stacked
+
+What would this game need if I want to publish it tomorrow?
+- End screen
+- Resurrect UI
+- [x] Wizards need to do something
+- [x] Behaviour stacking
+
+- [x] Ritual which turns corpses into souls at the end of each level
+- [x] Ritual which makes the shop cheaper
+- [ ] Knockback shouldn't work on the king
+
+
+## Final Day
+- [ ] Test the NG cycle
+- [ ] Make the shell wave less boring
+- [ ] Add the wizard to other waves
+- [ ] Review ritual names / necronomicon
+- [ ] Get game within budget
+- [ ] Submit
