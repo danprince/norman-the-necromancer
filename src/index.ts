@@ -56,7 +56,6 @@ function update(dt: number) {
 }
 
 game.addRitual(Streak);
-game.addRitual(Zap);
 
 shop.rituals = [
   Ceiling,
@@ -77,6 +76,7 @@ shop.rituals = [
   Bleed,
   Extraction,
   Benefactor,
+  Zap,
 ];
 
 init(game.stage.width, game.stage.height, update);
