@@ -1,6 +1,6 @@
 import * as sprites from "./sprites.json";
 import { ParticleEmitter, Sprite } from "./engine";
-import { DEG_90, Rectangle } from "./helpers";
+import { DEG_360, DEG_90, Rectangle } from "./helpers";
 
 export function bones() {
   return new ParticleEmitter({
@@ -55,9 +55,24 @@ export function royalty() {
       [sprites.p_star_1, sprites.p_star_2, sprites.p_star_3],
       [sprites.p_star_2, sprites.p_star_3, sprites.p_star_4],
       [sprites.p_star_1, sprites.p_star_3],
-      [sprites.p_purple_1, sprites.p_purple_2, sprites.p_purple_3],
-      [sprites.p_purple_2, sprites.p_purple_3, sprites.p_purple_4],
-      [sprites.p_purple_1, sprites.p_purple_2, sprites.p_purple_3],
     ],
+  });
+}
+
+export function dust() {
+  return new ParticleEmitter({
+    x: 0,
+    y: 0,
+    w: game.stage.width,
+    h: game.stage.height,
+    angle: [0, DEG_360],
+    duration: [5000, 10000],
+    velocity: [1, 3],
+    bounce: [0, 0],
+    frequency: 0.1,
+    variants: [
+      [sprites.p_dust_1, sprites.p_dust_2],
+      [sprites.p_dust_2, sprites.p_dust_1, sprites.p_dust_3, sprites.p_dust_1]
+    ]
   });
 }

@@ -3,10 +3,11 @@ import { Game, PLAYING } from "./game";
 import { render, screenToSceneCoords } from "./renderer";
 import { Cast, Resurrect } from "./actions";
 import { angleBetweenPoints } from "./helpers";
-import { BleedSpell, IceSpell, LightningSpell, Player, Skeleton, Spell } from "./objects";
+import { Player } from "./objects";
 import { isLevelFinished, updateLevel } from "./levels";
 import { Benefactor, Bleed, Bouncing, Broken, Ceiling, Drunkard, Explosive, Extraction, Freeze, Homing, Knockback, Meteoric, Pact, Rain, Seance, SplitOnBounce, Splitshot, Streak, Triggerfinger, Weightless, Zap } from "./rituals";
 import { buy, enterShop, selectShopIndex, shop } from "./shop";
+import { dust } from "./fx";
 
 let player = Player();
 let game = new Game(player);
@@ -55,6 +56,7 @@ function update(dt: number) {
   }
 }
 
+dust().burst(200);
 game.addRitual(Streak);
 
 shop.rituals = [
