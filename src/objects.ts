@@ -203,7 +203,7 @@ export function ShellKnight() {
   unit.sprite = sprites.shell_knight_up;
   unit.updateSpeed = 1000;
   unit.hp = unit.maxHp = 5;
-  unit.souls = 25;
+  unit.souls = 15;
 
   let shell = unit.addBehaviour();
   let shelled = false;
@@ -265,7 +265,7 @@ export function Piper() {
   unit.updateSpeed = 500;
   unit.hp = unit.maxHp = 15;
   unit.addBehaviour(new Summon(unit, Rat, 2000));
-  unit.souls = 200;
+  unit.souls = 100;
   return unit;
 }
 
@@ -273,7 +273,7 @@ export function Rat() {
   let unit = Villager();
   unit.sprite = sprites.rat;
   unit.updateSpeed = 200;
-  unit.souls = 1;
+  unit.souls = 5;
   unit.corpseChance = 0;
   return unit;
 }
@@ -301,7 +301,7 @@ export function RageKnight() {
     unit.sprite = angry ? sprites.rage_knight_enraged : sprites.rage_knight;
     march.step = angry ? 0 : step;
   };
-  unit.souls = 50;
+  unit.souls = 20;
   return unit;
 }
 
@@ -309,7 +309,7 @@ export function RoyalGuard() {
   let unit = Villager();
   unit.sprite = sprites.royal_guard;
   unit.hp = unit.maxHp = 4;
-  unit.souls = 20;
+  unit.souls = 10;
   let march = unit.getBehaviour(March)!;
 
   let shielded = false;
@@ -360,7 +360,7 @@ export function Wizard() {
   let unit = Villager();
   unit.sprite = sprites.wizard;
   unit.hp = unit.maxHp = 15;
-  unit.souls = 30;
+  unit.souls = 10;
   unit.addBehaviour(new Summon(unit, Portal, 3000));
   return unit;
 }
@@ -370,6 +370,7 @@ export function Portal() {
   unit.sprite = sprites.portal;
   unit.tags = LIVING;
   unit.hp = unit.maxHp = 3;
+  unit.souls = 10;
   // Prevent the player from farming portals for souls
   unit.addBehaviour(new DespawnTimer(unit, 3000 * 10));
   unit.addBehaviour(
