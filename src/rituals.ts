@@ -75,27 +75,6 @@ export let Bouncing: Ritual = {
   },
 };
 
-class ProjectileSplitOnBounce extends Behaviour {
-  onBounce(): void {
-    let p1 = this.object;
-    let p2 = Spell();
-    p2.vx = p1.vy;
-    p2.vy = p1.vx * 2;
-    game.spawn(p2, p1.x, p1.y);
-  }
-}
-
-export let SplitOnBounce: Ritual = {
-  tags: BOUNCING,
-  requiredTags: BOUNCING,
-  exclusiveTags: SPLITTING,
-  name: "Split on Bounce",
-  description: "Spells split after bouncing",
-  onCast(projectile) {
-    projectile.addBehaviour(new ProjectileSplitOnBounce(projectile));
-  },
-};
-
 class ProjectileExplode extends Behaviour {
   onBounce = this.explode;
   onCollision = this.explode;
