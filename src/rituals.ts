@@ -391,8 +391,14 @@ export let Freeze: Ritual = {
   name: "Freeze",
   description: "Small chance to freeze enemies",
   onCast(spell) {
-    if (randomFloat() < 0.1) {
-      spell.addBehaviour().onCollision = target => target.addBehaviour(new Frozen(target));
+    if (randomFloat() <= 0.1) {
+      spell.emitter!.variants = [[sprites.p_ice_1, sprites.p_ice_2, sprites.p_ice_3]];
+      spell.sprite = sprites.p_skull;
+      spell.removeBehaviour(spell.getBehaviour(Damaging)!);
+      // Frozen has to be added before other behaviours, so that it can prevent
+      // them from updating
+      spell.addBehaviour().onCollision = target =>
+        target.addBehaviour(new Frozen(target), 0);
     }
   },
 };

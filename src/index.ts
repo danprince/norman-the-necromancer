@@ -112,13 +112,13 @@ function updateDialogue(dt: number) {
 
 dust().burst(200);
 game.addRitual(Streak);
+game.addRitual(Freeze);
 
 shop.rituals = [
   Ceiling,
   Explosive,
   Rain,
   Bouncing,
-  SplitOnBounce,
   Splitshot,
   Homing,
   Weightless,
