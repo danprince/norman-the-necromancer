@@ -1,12 +1,12 @@
 import * as sprites from "./sprites.json";
 import { init, updateParticles, updateTweens } from "./engine";
-import { Game, INTRO, PLAYING } from "./game";
+import { Game, INTRO, PLAYING, WIN } from "./game";
 import { render, screenToSceneCoords } from "./renderer";
 import { Cast, Resurrect } from "./actions";
 import { angleBetweenPoints } from "./helpers";
 import { Player } from "./objects";
-import { isComplete, isLevelFinished, newGamePlus, updateLevel } from "./levels";
-import { Benefactor, Bleed, Bouncing, Broken, Ceiling, Drunkard, Explosive, Extraction, Freeze, Homing, Knockback, Rain, Seance, Splitshot, Streak, Triggerfinger, Weightless, Zap } from "./rituals";
+import { isComplete, isLevelFinished, updateLevel } from "./levels";
+import { Studious, Bleed, Bouncing, Unchained, Ceiling, Drunkard, Salvage, Chilly, Hunter, Knockback, Rain, Seer, Doubleshot, Streak, Weightless, Electrodynamics, Impatience } from "./rituals";
 import { buy, enterShop, selectShopIndex, shop } from "./shop";
 import { dust } from "./fx";
 import { BPM, play } from "./sounds";
@@ -80,8 +80,7 @@ function update(dt: number) {
 
   if (game.state === PLAYING && isLevelFinished()) {
     if (isComplete()) {
-      game.dialogue = OUTRO_DIALOGUE;
-      newGamePlus();
+      onWin();
     } else {
       game.onLevelEnd();
       enterShop();
@@ -94,6 +93,11 @@ function update(dt: number) {
     game.player.updateSpeed = 60_000 / BPM * 2;
     normanIsBouncing = true;
   }
+}
+
+function onWin() {
+  game.state = WIN;
+  game.dialogue = OUTRO_DIALOGUE;
 }
 
 let dialogueTimer = 0;
@@ -113,23 +117,22 @@ function updateDialogue(dt: number) {
 game.addRitual(Streak);
 
 shop.rituals = [
-  Ceiling,
-  Explosive,
-  Rain,
   Bouncing,
-  Splitshot,
-  Homing,
+  Ceiling,
+  Rain,
+  Doubleshot,
+  Hunter,
   Weightless,
   Knockback,
   Drunkard,
-  Seance,
-  Broken,
-  Triggerfinger,
+  Seer,
+  Unchained,
+  Impatience,
   Bleed,
-  Extraction,
-  Benefactor,
-  Zap,
-  Freeze,
+  Salvage,
+  Studious,
+  Electrodynamics,
+  Chilly,
 ];
 
 game.dialogue = INTRO_DIALOGUE;

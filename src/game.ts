@@ -254,7 +254,6 @@ export class Game {
   souls: number = 0;
   streak: number = 0;
   level: number = 0;
-  newGame: number = 0;
   dialogue: string[] = [];
 
   spell: Spell = {

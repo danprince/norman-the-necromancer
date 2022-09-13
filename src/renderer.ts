@@ -47,7 +47,7 @@ export function render(dt: number) {
 
 function drawShop() {
   write("~~-~--~~~-~~\n", 160, 20);
-  write("Necronomicon\n");
+  write("  Rituals\n");
   write("~~-~--~~~-~~\n\n");
   let selected = shop.items[shop.selectedIndex];
   for (let item of shop.items) {

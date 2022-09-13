@@ -1,8 +1,9 @@
-import { randomElement, randomInt, shuffled } from "./helpers";
+import { randomElement } from "./helpers";
 
 function freq(step: number): number {
-  // fn = f0 * a^n
-  // where // f0 = the frequency of one fixed note which must be defined. A common choice is setting the A above middle C (A4) at f0 = 440 Hz.  // n = the number of half steps away from the fixed note you are. If you are at a higher note, n is positive. If you are on a lower note, n is negative.
+  // fn = f0 * a^n where:
+  // f0 = the frequency of one fixed note which must be defined. A common choice is setting the A above middle C (A4) at f0 = 440 Hz. 
+  // n = the number of half steps away from the fixed note you are. If you are at a higher note, n is positive. If you are on a lower note, n is negative.
   // fn = the frequency of the note n half steps away.
   // a = (2)1/12 = the twelth root of 2 = the number which when multiplied by itself 12 times equals 2 = 1.059463094359...
   return 440 * Math.pow(Math.pow(2, 1/12), step);
@@ -68,30 +69,8 @@ const A_HARMONIC_MINOR = [
   A4, B4, C4, D4, F4, E4, Ab5, A5,
 ];
 
-// prettier-ignore
-const BASS_MELODY = [2,4,5,8,-12,8,-1,4,-12,4,-10,8,-4,4,-4,8,0,4,2,4,-9,4,12,4,12,8,12,8,0,8,12,4,3,8,5,4,-12,4,-12,4,2,4,5,8,-12,8,-1,4,-12,4,-10,8,-4,4,-4,8,0,4,2,4,-9,4,12,4,12,8,12,8,0,8,12,4,3,8,5,4,-12,4,-12,4,2,4,5,8,-12,8,-1,4,-12,4,-10,8,-4,4,-4,8,0,4,2,4,-9,4,12,4,12,8,12,8,0,8,12,4,3,8,5,4,-12,4,-12,4,12,4,-4,8,2,8,-1,4,-9,8,-7,4,-10,4,-7,4,7,4,-1,4,-7,4,-4,8,-5,8,2,4,-5,8,-4,4,-12,4,-1,4,2,4,2,4,5,8,-12,8,-1,4,-12,4,-10,8,-4,4,-4,8,0,4,2,4,-9,4,12,4,12,8,12,8,0,8,12,4,3,8,5,4,-12,4,-12,4,2,4,5,8,-12,8,-1,4,-12,4,-10,8,-4,4,-4,8,0,4,2,4,-9,4,12,4,12,8,12,8,0,8,12,4,3,8,5,4,-12,4,-12,4,2,4,5,8,-12,8,-1,4,-12,4,-10,8,-4,4,-4,8,0,4,2,4,-9,4,12,4,12,8,12,8,0,8,12,4,3,8,5,4,-12,4,-12,4,-5,8,-5,8,-12,8,-5,4,0,4,-5,4,-5,8,-5,4,-12,4,-12,4,-12,8,0,8,0,8,0,4,-5,8,-12,8,0,8,-12,4,0,8,-5,4,0,4,-12,8];
-
 let masterGain = new GainNode(ctx, { gain: 0 });
 masterGain.connect(ctx.destination);
-
-let startQueue: Synth[] = [];
-
-function createNoise(length: number) {
-  let bufferSize = ctx.sampleRate * length;
-  let buffer = new AudioBuffer({
-    length: bufferSize,
-    sampleRate: ctx.sampleRate,
-  });
-  let data = buffer.getChannelData(0);
-  for (let i = 0; i < bufferSize; i++) {
-    data[i] = Math.random() * 2 - 1;
-  }
-  return new AudioBufferSourceNode(ctx, { buffer });
-}
-
-let synth = Synth();
-synth.start();
-synth.enter();
 
 function createReverb(duration = 3, decay = 2) {
   let convolver = new ConvolverNode(ctx, {});
@@ -121,7 +100,6 @@ interface Synth {
   start(): void;
   enter(): void;
   exit(): void;
-  loopCallback(): void;
 }
 
 function Synth(): Synth {
@@ -146,7 +124,8 @@ function Synth(): Synth {
       osc.frequency.setValueAtTime(frequency, time);
     },
     start() {
-      startQueue.push(this);
+      this.osc.start();
+      this.enter();
     },
     enter() {
       volume.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 1);
@@ -154,7 +133,6 @@ function Synth(): Synth {
     exit() {
       volume.gain.linearRampToValueAtTime(0, ctx.currentTime + 1);
     },
-    loopCallback() {},
   };
 }
 
@@ -215,7 +193,6 @@ function sequence(pattern: number[], retune: number = 0, synth: Synth) {
     looper.stop(time);
     looper.onended = () => {
       loop();
-      synth.loopCallback();
     }
   }
 
@@ -243,23 +220,21 @@ function createPattern(
   return pattern;
 }
 
+// prettier-ignore
+const BASS_MELODY = [2,4,5,8,-12,8,-1,4,-12,4,-10,8,-4,4,-4,8,0,4,2,4,-9,4,12,4,12,8,12,8,0,8,12,4,3,8,5,4,-12,4,-12,4,2,4,5,8,-12,8,-1,4,-12,4,-10,8,-4,4,-4,8,0,4,2,4,-9,4,12,4,12,8,12,8,0,8,12,4,3,8,5,4,-12,4,-12,4,2,4,5,8,-12,8,-1,4,-12,4,-10,8,-4,4,-4,8,0,4,2,4,-9,4,12,4,12,8,12,8,0,8,12,4,3,8,5,4,-12,4,-12,4,12,4,-4,8,2,8,-1,4,-9,8,-7,4,-10,4,-7,4,7,4,-1,4,-7,4,-4,8,-5,8,2,4,-5,8,-4,4,-12,4,-1,4,2,4,2,4,5,8,-12,8,-1,4,-12,4,-10,8,-4,4,-4,8,0,4,2,4,-9,4,12,4,12,8,12,8,0,8,12,4,3,8,5,4,-12,4,-12,4,2,4,5,8,-12,8,-1,4,-12,4,-10,8,-4,4,-4,8,0,4,2,4,-9,4,12,4,12,8,12,8,0,8,12,4,3,8,5,4,-12,4,-12,4,2,4,5,8,-12,8,-1,4,-12,4,-10,8,-4,4,-4,8,0,4,2,4,-9,4,12,4,12,8,12,8,0,8,12,4,3,8,5,4,-12,4,-12,4,-5,8,-5,8,-12,8,-5,4,0,4,-5,4,-5,8,-5,4,-12,4,-12,4,-12,8,0,8,0,8,0,4,-5,8,-12,8,0,8,-12,4,0,8,-5,4,0,4,-12,8];
+
 function createBassline() {
   let a = createPattern(4, [E, Q], [A_HARMONIC_MINOR, A3, A3, A3, A3, A3].flat());
   let b = createPattern(4, [E, Q], A_HARMONIC_MINOR);
-  let c = createPattern(4, [E, Q], A_HARMONIC_MINOR);
-  let d = createPattern(4, [E, Q], [A3, A4, E3].flat());
-  let p = [a, a, a, b].flat();
-  //p = BASS_MELODY;
-  return p;
+  return [a, a, a, b].flat();
+  //return BASS_MELODY;
 }
 
 function createLeadLine() {
-  //let a = createPattern(4, [E], [A3, A4, __]);
-  //let b = createPattern(4, [E, Q], [A3, A4, __]);
-  //return [a, b, a, b].flat();
-  let a = [A3, E, __, E, A3, E, __, E];
-  let b = [E3, Q, A3, E, E3, E, __, E, A3, E, E3, E, __, E];
-  return [a, a, b].flat();
+  let a = [A4, E, __, E, A4, E, __, E];
+  let b = [E4, Q, A4, E, E4, E, __, E, A4, E, E4, E, __, E];
+  let c = [__, H];
+  return [a, c, a, c, a, c, b].flat();
 }
 
 export let synths = {
@@ -287,7 +262,6 @@ export function play() {
   sequence([A4, E, A3, E], -36, synths.ambientOrgan);
   sequence(createLeadLine(), -12, synths.lead);
   sequence(createBassline(), -24, synths.bass);
-  synths.kick.loopCallback = startQueuedSynths;
 
   {
     // King's Theme
@@ -304,14 +278,6 @@ export function play() {
   useLevelSynths();
 }
 
-function startQueuedSynths() {
-  for (let synth of startQueue) {
-    synth.osc.start();
-    synth.enter();
-  }
-  startQueue = [];
-}
-
 let normalLevelSynths: Synth[] = [synths.kick, synths.bass, synths.lead];
 let bossLevelSynths: Synth[] = [synths.kingsBass, synths.kingsOrgan1, synths.kingsOrgan2];
 
@@ -322,7 +288,6 @@ export function useShopSynths() {
 
 export function useLevelSynths() {
   if (game.level === 0) synths.ambientOrgan.start();
-  if (game.level === 0) startQueuedSynths();
   if (game.level === 1) synths.bass.start();
   if (game.level === 2) synths.kick.start();
   if (game.level === 4) synths.lead.start();

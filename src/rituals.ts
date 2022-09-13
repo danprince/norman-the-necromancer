@@ -38,61 +38,21 @@ export let Bouncing: Ritual = {
   },
 };
 
-class ProjectileExplode extends Behaviour {
-  onBounce = this.explode;
-  onCollision = this.explode;
-
-  explode() {
-    let spell = this.object;
-    game.despawn(spell);
-
-    for (let object of game.objects) {
-      if (object.is(this.object.collisionMask)) {
-        if (distance(spell, object) < 50) {
-          Damage(object, 1, spell);
-        }
-      }
-    }
-
-    screenshake(50);
-    fx.trail()
-      .extend({
-        ...spell.center(),
-        velocity: [50, 100],
-        angle: [0, DEG_360],
-        duration: [200, 500],
-      })
-      .burst(200)
-      .remove();
-  }
-}
-
-export let Explosive: Ritual = {
-  tags: EXPLOSIVE,
-  exclusiveTags: BOUNCING,
-  rarity: RARE,
-  name: "Explosive",
-  description: "Spells explode on impact",
-  onCast(projectile) {
-    projectile.addBehaviour(new ProjectileExplode(projectile));
-  },
-}
-
-export let Splitshot: Ritual = {
+export let Doubleshot: Ritual = {
   tags: SPLITTING,
   exclusiveTags: SPLITTING,
   rarity: RARE,
-  name: "Splitshot",
-  description: "Shoot 2 projectiles",
+  name: "Doubleshot",
+  description: "Cast 2 spells",
   onActive() {
     game.spell.shotsPerRound = 2;
   },
 }
 
-export let Homing: Ritual = {
+export let Hunter: Ritual = {
   tags: HOMING,
   rarity: RARE,
-  name: "Homing",
+  name: "Hunter",
   description: "Spells seek living enemies",
   onCast(projectile) {
     projectile.addBehaviour(new Seeking(projectile));
@@ -111,25 +71,14 @@ export let Weightless: Ritual = {
   },
 }
 
-export let Piercing: Ritual = {
-  tags: NONE,
-  rarity: RARE,
-  name: "Piercing",
-  // TODO: Too powerful, maybe percentage chance instead? Or maybe getting weaker?
-  description: "Spells pass through enemies",
-  onCast(spell) {
-    spell.despawnOnCollision = false;
-  },
-}
-
 class KnockbackSpell extends Behaviour {
   onCollision(target: GameObject): void {
+    // Knockback shouldn't work on the king
     if (target.mass < 1000) {
       tween(target.x, target.x + 16, 200, x => target.x = x);
     }
-    //target.addBehaviour(new Stunned(target));
 
-    // Knock objects backwards
+    // Throw objects into the air
     //for (let object of game.objects) {
     //  if (this.object.collisionMask & object.tags) {
     //    let dist = distance(this.object, object);
@@ -189,7 +138,7 @@ export let Rain: Ritual = {
   exclusiveTags: SPLITTING,
   rarity: RARE,
   name: "Rain",
-  description: "Spells split when they start to drop",
+  description: "Spells split when they drop",
   recursive: false,
   onCast(spell) {
     spell.addBehaviour(new RainSpell(spell));
@@ -207,20 +156,20 @@ export let Drunkard: Ritual = {
   },
 };
 
-export let Seance: Ritual = {
+export let Seer: Ritual = {
   tags: NONE,
-  name: "Seance",
-  description: "Your spells pass through the undead",
+  name: "Seer",
+  description: "Spells pass through the dead",
   onCast(spell) {
     spell.collisionMask = LIVING;
   }
 };
 
-export let Broken: Ritual = {
+export let Unchained: Ritual = {
   tags: NONE,
   rarity: RARE,
-  name: "Broken",
-  description: "Deal 3x damage, but max hp is reduced to 1",
+  name: "Unchained",
+  description: "3x damage but max hp is 1",
   onActive() {
     game.player.hp = game.player.maxHp = 1;
   },
@@ -229,9 +178,9 @@ export let Broken: Ritual = {
   }
 };
 
-export let Triggerfinger: Ritual = {
+export let Impatience: Ritual = {
   tags: CASTING_RATE,
-  name: "Triggerfinger",
+  name: "Impatience",
   description: "Casts recharge 2x faster",
   onActive() {
     game.spell.castRechargeRate /= 2;
@@ -241,7 +190,7 @@ export let Triggerfinger: Ritual = {
 export let Bleed: Ritual = {
   tags: CURSE,
   name: "Bleed",
-  description: "Inflicts bleed on targets",
+  description: "Inflicts bleed on hits",
   onCast(spell: GameObject) {
     spell.sprite = sprites.p_red_skull;
     spell.emitter!.extend({
@@ -270,11 +219,11 @@ export let BigFred: Ritual = {
   },
 };
 
-export let Extraction: Ritual = {
+export let Salvage: Ritual = {
   tags: NONE,
   rarity: RARE,
   name: "Extraction",
-  description: "Corpses become souls at the end of each level",
+  description: "Corpses become souls at the end of levels",
   onLevelEnd() {
     let corpses = game.objects.filter(object => object.is(CORPSE));
 
@@ -292,11 +241,11 @@ export let Extraction: Ritual = {
   },
 };
 
-export let Benefactor: Ritual = {
+export let Studious: Ritual = {
   tags: NONE,
   rarity: RARE,
-  name: "Benefactor",
-  description: "Necronomicon upgrades are 50% cheaper",
+  name: "Studious",
+  description: "Rituals are 50% cheaper",
   onShopEnter() {
     for (let item of shop.items) {
       item.cost = item.cost / 2 | 0;
@@ -304,21 +253,21 @@ export let Benefactor: Ritual = {
   },
 };
 
-export let Zap: Ritual = {
+export let Electrodynamics: Ritual = {
   tags: NONE,
   rarity: RARE,
-  name: "Zap",
+  name: "Electrodynamics",
   description: "Lightning strikes after hits",
   onCast(spell) {
     spell.addBehaviour(new LightningStrike(spell));
   },
 };
 
-export let Freeze: Ritual = {
+export let Chilly: Ritual = {
   tags: NONE,
   rarity: RARE,
-  name: "Freeze",
-  description: "Small chance to freeze enemies",
+  name: "Chilly",
+  description: "10% chance to freeze enemies",
   onCast(spell) {
     if (randomFloat() <= 0.1) {
       spell.emitter!.variants = [[sprites.p_ice_1, sprites.p_ice_2, sprites.p_ice_3]];

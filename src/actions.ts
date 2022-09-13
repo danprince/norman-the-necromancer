@@ -2,7 +2,7 @@ import * as sprites from "./sprites.json";
 import * as fx from "./fx";
 import { Damage, Death, GameObject } from "./game";
 import { clamp, randomFloat, randomInt, vectorFromAngle } from "./helpers";
-import { Corpse, Spell, Skeleton, LightningSpell, BleedSpell, IceSpell } from "./objects";
+import { Corpse, Spell, Skeleton } from "./objects";
 import { CORPSE, MOBILE } from "./tags";
 
 export function Damage(
