@@ -59,7 +59,6 @@ export let Hunter: Ritual = {
 
 export let Weightless: Ritual = {
   tags: NONE,
-  rarity: RARE,
   name: "Weightless",
   description: "Spells are not affected by gravity",
   onCast(spell) {
@@ -165,7 +164,6 @@ export let Seer: Ritual = {
 
 export let Tearstone: Ritual = {
   tags: NONE,
-  rarity: RARE,
   name: "Tearstone",
   description: "2x damage when < half HP",
   onCast(spell) {
@@ -209,7 +207,6 @@ export let Bleed: Ritual = {
 
 export let Allegiance: Ritual = {
   tags: NONE,
-  rarity: RARE,
   name: "Allegiance",
   description: "Summon your honour guard after resurrections",
   onResurrect() {
@@ -223,7 +220,6 @@ export let Allegiance: Ritual = {
 
 export let Salvage: Ritual = {
   tags: NONE,
-  rarity: RARE,
   name: "Salvage",
   description: "Corpses become souls at the end of levels",
   onLevelEnd() {
@@ -267,7 +263,6 @@ export let Electrodynamics: Ritual = {
 
 export let Chilly: Ritual = {
   tags: NONE,
-  rarity: RARE,
   name: "Chilly",
   description: "10% chance to freeze enemies",
   onCast(spell) {
