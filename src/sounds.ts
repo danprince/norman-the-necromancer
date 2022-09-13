@@ -230,17 +230,9 @@ function createBassline() {
   //return BASS_MELODY;
 }
 
-function createLeadLine() {
-  let a = [E4, Q, F4, Q, D4, Q, F4, Q];
-  let b = [E4, Q, A4, E, E4, E, __, E, A4, E, E4, E, __, E];
-  let c = [__, Q];
-  return [a, a, a, b].flat();
-}
-
 export let synths = {
   kick: Kick(),
   ambientOrgan: Organ(6, 1),
-  lead: Organ(2, 0.5),
   bass: Lead(),
   kingsOrgan1: Organ(3, 0.25),
   kingsOrgan2: Organ(3, 1),
@@ -260,7 +252,6 @@ export function play() {
 
   sequence([A4, H, __, H], -36, synths.kick);
   sequence([A4, E, A3, E], -36, synths.ambientOrgan);
-  sequence(createLeadLine(), -12, synths.lead);
   sequence(createBassline(), -24, synths.bass);
 
   {
@@ -278,19 +269,17 @@ export function play() {
   useLevelSynths();
 }
 
-let normalLevelSynths: Synth[] = [synths.kick, synths.bass, synths.lead];
+let normalLevelSynths: Synth[] = [synths.kick, synths.bass];
 let bossLevelSynths: Synth[] = [synths.kingsBass, synths.kingsOrgan1, synths.kingsOrgan2];
 
 export function useShopSynths() {
   synths.kick.exit();
-  synths.lead.exit();
 }
 
 export function useLevelSynths() {
   if (game.level === 0) synths.ambientOrgan.start();
   if (game.level === 1) synths.bass.start();
   if (game.level === 2) synths.kick.start();
-  if (game.level === 7) synths.lead.start();
   if (game.level === 9) {
     for (let synth of normalLevelSynths) synth.exit()
     for (let synth of bossLevelSynths) synth.start()

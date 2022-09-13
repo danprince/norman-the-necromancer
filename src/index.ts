@@ -6,7 +6,7 @@ import { Cast, Resurrect } from "./actions";
 import { angleBetweenPoints } from "./helpers";
 import { Player } from "./objects";
 import { isComplete, isLevelFinished, updateLevel } from "./levels";
-import { Studious, Bleed, Bouncing, Tearstone, Ceiling, Drunkard, Salvage, Chilly, Hunter, Knockback, Rain, Seer, Doubleshot, Streak, Weightless, Electrodynamics, Impatience, Vengeful, Avarice, Hardened, Allegiance } from "./rituals";
+import { Studious, Bleed, Bouncing, Tearstone, Ceiling, Drunkard, Salvage, Chilly, Hunter, Knockback, Rain, Seer, Doubleshot, Streak, Weightless, Electrodynamics, Impatience, Giants, Avarice, Hardened, Allegiance } from "./rituals";
 import { buy, enterShop, selectShopIndex, shop } from "./shop";
 import { dust } from "./fx";
 import { BPM, play } from "./sounds";
@@ -33,8 +33,10 @@ const INTRO_DIALOGUE = [
 
 const OUTRO_DIALOGUE = [
   "",
-  "The king was defeated. Norman could rest...",
-  "But not for long",
+  "It was over.",
+  "Norman was able to study peacefully.",
+  "But he knew that eventually, they'd be back.",
+  "THE END",
 ];
 
 onpointerup = () => {
@@ -138,7 +140,7 @@ shop.rituals = [
   Studious,
   Electrodynamics,
   Chilly,
-  Vengeful,
+  Giants,
   Avarice,
   Hardened,
   Allegiance,

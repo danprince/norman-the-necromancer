@@ -167,9 +167,9 @@ export let Tearstone: Ritual = {
   tags: NONE,
   rarity: RARE,
   name: "Tearstone",
-  description: "3x damage when on 1 HP",
+  description: "2x damage when < half HP",
   onCast(spell) {
-    if (game.player.hp === 1) {
+    if (game.player.hp < game.player.maxHp / 2) {
       spell.getBehaviour(Damaging)!.amount *= 3;
     }
   }
@@ -224,7 +224,7 @@ export let Allegiance: Ritual = {
 export let Salvage: Ritual = {
   tags: NONE,
   rarity: RARE,
-  name: "Extraction",
+  name: "Salvage",
   description: "Corpses become souls at the end of levels",
   onLevelEnd() {
     let corpses = game.objects.filter(object => object.is(CORPSE));
@@ -287,10 +287,10 @@ export let Chilly: Ritual = {
   },
 };
 
-export let Vengeful: Ritual = {
+export let Giants: Ritual = {
   tags: NONE,
-  name: "Vengeful",
-  description: "20% chance to resurrect larger skeletons",
+  name: "Giants",
+  description: "20% chance to resurrect giant skeletons",
   onResurrection(object) {
     if (randomFloat() < 0.2) {
       game.despawn(object);

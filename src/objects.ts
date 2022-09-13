@@ -115,7 +115,7 @@ export function Villager() {
   unit.hp = unit.maxHp = 1;
   unit.updateSpeed = 600;
   unit.addBehaviour(new March(unit, -16));
-  unit.corpseChance = 1;
+  unit.corpseChance = 0.75;
   unit.souls = 5;
   return unit;
 }
@@ -168,7 +168,7 @@ export function TheKing() {
       marching.step /= 2;
       let t = 0;
       unit.addBehaviour().onFrame = dt => {
-        if ((t += dt) > 100) {
+        if ((t += dt) > 300) {
           t = 0;
           game.spawn(Corpse(), randomInt(game.stage.width), game.stage.ceiling);
         }
@@ -344,7 +344,7 @@ export function RoyalGuard() {
 export function RoyalGuardOrb() {
   let unit = new GameObject();
   unit.sprite = sprites.yellow_orb;
-  unit.tags = LIVING;
+  unit.tags = SPELL;
   unit.collisionMask = MOBILE | PLAYER;
   unit.hp = 1;
   unit.despawnOnBounce = true;
