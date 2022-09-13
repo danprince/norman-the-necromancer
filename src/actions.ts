@@ -98,11 +98,7 @@ export function Resurrect() {
 
     let unit = Skeleton();
     game.spawn(unit, corpse.x, 0);
-    fx.cloud(unit.bounds(), [
-      [sprites.p_green_1, sprites.p_green_2, sprites.p_green_3],
-      [sprites.p_green_2, sprites.p_green_3, sprites.p_green_4],
-      [sprites.p_green_1, sprites.p_green_3, sprites.p_green_5],
-    ]).burst(10).remove();
+    fx.resurrect(unit).burst(10).remove();
 
     for (let ritual of game.rituals) {
       ritual.onResurrection?.(unit);

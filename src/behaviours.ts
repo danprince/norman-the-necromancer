@@ -222,7 +222,7 @@ export class LightningStrike extends Behaviour {
       //bolt.addBehaviour(new Seeking(bolt));
       bolt.vy = -200;
       bolt.vx = randomInt(20) - 10;
-      bolt.y = clamp(50 + randomInt(100), 0, game.stage.ceiling);
+      bolt.y = clamp(50 + randomInt(100), 0, game.stage.ceiling - 10);
       bolt.x = target.x + randomInt(50) - 25;
       game.spawn(bolt);
     }

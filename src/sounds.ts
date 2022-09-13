@@ -231,10 +231,10 @@ function createBassline() {
 }
 
 function createLeadLine() {
-  let a = [A4, E, __, E, A4, E, __, E];
+  let a = [E4, Q, F4, Q, D4, Q, F4, Q];
   let b = [E4, Q, A4, E, E4, E, __, E, A4, E, E4, E, __, E];
-  let c = [__, H];
-  return [a, c, a, c, a, c, b].flat();
+  let c = [__, Q];
+  return [a, a, a, b].flat();
 }
 
 export let synths = {
@@ -290,7 +290,7 @@ export function useLevelSynths() {
   if (game.level === 0) synths.ambientOrgan.start();
   if (game.level === 1) synths.bass.start();
   if (game.level === 2) synths.kick.start();
-  if (game.level === 4) synths.lead.start();
+  if (game.level === 7) synths.lead.start();
   if (game.level === 9) {
     for (let synth of normalLevelSynths) synth.exit()
     for (let synth of bossLevelSynths) synth.start()

@@ -46,9 +46,7 @@ export function render(dt: number) {
 }
 
 function drawShop() {
-  write("~~-~--~~~-~~\n", 160, 20);
-  write("  Rituals\n");
-  write("~~-~--~~~-~~\n\n");
+  write("Rituals\n\n", 160, 20);
   let selected = shop.items[shop.selectedIndex];
   for (let item of shop.items) {
     write(
@@ -57,9 +55,7 @@ function drawShop() {
       } $${item.cost}\n`,
     );
   }
-  write("\n~~-~--~~~-~~\n");
-  write(selected?.description + "\n");
-  write("~~-~--~~~-~~\n");
+  write("\n" + selected?.description + "\n");
 }
 
 function drawHud() {

@@ -1,13 +1,11 @@
 import * as fx from "./fx";
 import * as sprites from "./sprites.json";
-import { Damage } from "./actions";
 import { Bleeding, Damaging, DespawnTimer, Frozen, HitStreak, LightningStrike, Seeking } from "./behaviours";
 import { tween } from "./engine";
 import { Behaviour, GameObject, RARE, Ritual } from "./game";
-import { DEG_180, DEG_360, distance, randomFloat, randomInt } from "./helpers";
+import { DEG_180, randomFloat, randomInt } from "./helpers";
 import { SkeletonLord, Spell } from "./objects";
-import { screenshake } from "./renderer";
-import { CORPSE, LIVING, UNDEAD } from "./tags";
+import { CORPSE, LIVING } from "./tags";
 import { shop } from "./shop";
 
 // Ritual tags
@@ -53,7 +51,7 @@ export let Hunter: Ritual = {
   tags: HOMING,
   rarity: RARE,
   name: "Hunter",
-  description: "Spells seek living enemies",
+  description: "Spells seek targets",
   onCast(projectile) {
     projectile.addBehaviour(new Seeking(projectile));
   },
@@ -94,7 +92,7 @@ class KnockbackSpell extends Behaviour {
 export let Knockback: Ritual = {
   tags: NONE,
   name: "Knockback",
-  description: "Spells knock enemies backwards",
+  description: "Spells knock backwards",
   onCast(spell) {
     spell.addBehaviour(new KnockbackSpell(spell));
   },
@@ -148,7 +146,7 @@ export let Rain: Ritual = {
 export let Drunkard: Ritual = {
   tags: NONE,
   name: "Drunkard",
-  description: "Do 2x damage, but your aim is wobbly",
+  description: "2x damage, wobbly aim",
   onCast(spell) {
     spell.vx += randomInt(100) - 50;
     spell.vy += randomInt(100) - 50;
@@ -165,25 +163,24 @@ export let Seer: Ritual = {
   }
 };
 
-export let Unchained: Ritual = {
+export let Tearstone: Ritual = {
   tags: NONE,
   rarity: RARE,
-  name: "Unchained",
-  description: "3x damage but max hp is 1",
-  onActive() {
-    game.player.hp = game.player.maxHp = 1;
-  },
+  name: "Tearstone",
+  description: "3x damage when on 1 HP",
   onCast(spell) {
-    spell.getBehaviour(Damaging)!.amount *= 3;
+    if (game.player.hp === 1) {
+      spell.getBehaviour(Damaging)!.amount *= 3;
+    }
   }
 };
 
 export let Impatience: Ritual = {
-  tags: CASTING_RATE,
+  tags: NONE,
   name: "Impatience",
-  description: "Casts recharge 2x faster",
+  description: "Resurrection recharges 2x faster",
   onActive() {
-    game.spell.castRechargeRate /= 2;
+    game.ability.cooldown /= 2;
   }
 };
 
@@ -210,12 +207,17 @@ export let Bleed: Ritual = {
   }
 };
 
-export let BigFred: Ritual = {
+export let Allegiance: Ritual = {
   tags: NONE,
-  name: "Big Fred",
-  description: "Summon Norman's Neighbour each resurrection",
+  rarity: RARE,
+  name: "Allegiance",
+  description: "Summon your honour guard after resurrections",
   onResurrect() {
-    game.spawn(SkeletonLord(), game.player.x, game.player.y);
+    for (let i = 0; i < 3; i++) {
+      let unit = SkeletonLord();
+      unit.updateSpeed = 200;
+      game.spawn(unit, i * -15, 0);
+    }
   },
 };
 
@@ -272,11 +274,45 @@ export let Chilly: Ritual = {
     if (randomFloat() <= 0.1) {
       spell.emitter!.variants = [[sprites.p_ice_1, sprites.p_ice_2, sprites.p_ice_3]];
       spell.sprite = sprites.p_skull;
-      spell.removeBehaviour(spell.getBehaviour(Damaging)!);
+      spell.getBehaviour(Damaging)!.amount = 0;
       // Frozen has to be added before other behaviours, so that it can prevent
       // them from updating
-      spell.addBehaviour().onCollision = target =>
-        target.addBehaviour(new Frozen(target), 0);
+      spell.addBehaviour().onCollision = target => {
+        // King can't be frozen
+        if (target.mass < 1000) {
+          target.addBehaviour(new Frozen(target), 0);
+        }
+      };
     }
   },
+};
+
+export let Vengeful: Ritual = {
+  tags: NONE,
+  name: "Vengeful",
+  description: "20% chance to resurrect larger skeletons",
+  onResurrection(object) {
+    if (randomFloat() < 0.2) {
+      game.despawn(object);
+      game.spawn(SkeletonLord(), object.x, object.y);
+    }
+  },
+};
+
+export let Avarice: Ritual = {
+  tags: NONE,
+  name: "Avarice",
+  description: "+1 soul for each corpse you resurrect",
+  onResurrection() {
+    game.addSouls(1);
+  },
+};
+
+export let Hardened: Ritual = {
+  tags: NONE,
+  name: "Hardened",
+  description: "Unead have +1 HP*",
+  onResurrection(object) {
+    object.hp = object.maxHp += 1;
+  }
 };

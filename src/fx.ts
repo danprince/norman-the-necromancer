@@ -1,6 +1,7 @@
 import * as sprites from "./sprites.json";
 import { ParticleEmitter, Sprite } from "./engine";
 import { DEG_360, DEG_90, Rectangle } from "./helpers";
+import { GameObject } from "./game";
 
 export function bones() {
   return new ParticleEmitter({
@@ -75,4 +76,12 @@ export function dust() {
       [sprites.p_dust_2, sprites.p_dust_1, sprites.p_dust_3, sprites.p_dust_1]
     ]
   });
+}
+
+export function resurrect(unit: GameObject) {
+  return cloud(unit.bounds(), [
+    [sprites.p_green_1, sprites.p_green_2, sprites.p_green_3],
+    [sprites.p_green_2, sprites.p_green_3, sprites.p_green_4],
+    [sprites.p_green_1, sprites.p_green_3, sprites.p_green_5],
+  ]).extend({ frequency: 0 });
 }

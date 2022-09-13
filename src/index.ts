@@ -1,12 +1,12 @@
 import * as sprites from "./sprites.json";
 import { init, updateParticles, updateTweens } from "./engine";
-import { Game, INTRO, PLAYING, WIN } from "./game";
+import { Game, INTRO, PLAYING, SHOPPING, WIN } from "./game";
 import { render, screenToSceneCoords } from "./renderer";
 import { Cast, Resurrect } from "./actions";
 import { angleBetweenPoints } from "./helpers";
 import { Player } from "./objects";
 import { isComplete, isLevelFinished, updateLevel } from "./levels";
-import { Studious, Bleed, Bouncing, Unchained, Ceiling, Drunkard, Salvage, Chilly, Hunter, Knockback, Rain, Seer, Doubleshot, Streak, Weightless, Electrodynamics, Impatience } from "./rituals";
+import { Studious, Bleed, Bouncing, Tearstone, Ceiling, Drunkard, Salvage, Chilly, Hunter, Knockback, Rain, Seer, Doubleshot, Streak, Weightless, Electrodynamics, Impatience, Vengeful, Avarice, Hardened, Allegiance } from "./rituals";
 import { buy, enterShop, selectShopIndex, shop } from "./shop";
 import { dust } from "./fx";
 import { BPM, play } from "./sounds";
@@ -32,6 +32,7 @@ const INTRO_DIALOGUE = [
 ];
 
 const OUTRO_DIALOGUE = [
+  "",
   "The king was defeated. Norman could rest...",
   "But not for long",
 ];
@@ -56,7 +57,7 @@ onkeydown = ({ which: key }) => {
   if (game.state === PLAYING) {
     if (key === SPACE) Resurrect();
     if (key === KEY_P) paused = !paused;
-  } else {
+  } else if (game.state === SHOPPING) {
     if (key === ARROW_UP) selectShopIndex(-1);
     if (key === ARROW_DOWN) selectShopIndex(+1);
     if (key === ENTER) buy();
@@ -74,9 +75,13 @@ function update(dt: number) {
     updateLevel(dt);
   }
 
-  game.update(dt);
+  if (game.state !== INTRO) {
+    game.update(dt);
+  }
+
   updateTweens(dt);
   updateParticles(dt);
+
 
   if (game.state === PLAYING && isLevelFinished()) {
     if (isComplete()) {
@@ -126,13 +131,17 @@ shop.rituals = [
   Knockback,
   Drunkard,
   Seer,
-  Unchained,
+  Tearstone,
   Impatience,
   Bleed,
   Salvage,
   Studious,
   Electrodynamics,
   Chilly,
+  Vengeful,
+  Avarice,
+  Hardened,
+  Allegiance,
 ];
 
 game.dialogue = INTRO_DIALOGUE;

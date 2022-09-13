@@ -49,12 +49,12 @@ export function restockShop() {
     game.player.hp < game.player.maxHp &&
       ShopItem(10 * game.level, "Heal", `Heal 1*`, () => Damage(game.player, -1)),
 
-    ShopItem(10 * exp, "Revive", `+1* max hp`, () => {
+    ShopItem(10 * exp, "Renew", `+1* max hp`, () => {
       game.player.maxHp++;
       game.player.hp++;
     }),
 
-    ShopItem(10 * exp, "Charge", "+1\x7F max casts", () => game.spell.maxCasts++),
+    ShopItem(10 * exp, "Recharge", "+1\x7F max casts", () => game.spell.maxCasts++),
 
     ...createRitualItems(),
     ShopItem(0, "Continue", "Begin the next level", () => exitShop()),

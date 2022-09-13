@@ -3,7 +3,7 @@ import * as fx from "./fx";
 import * as sfx from "./sounds";
 import { Behaviour, GameObject } from "./game";
 import { CORPSE, LIVING, SPELL, MOBILE, PLAYER, UNDEAD } from "./tags";
-import { DEG_180, DEG_90, randomElement } from "./helpers";
+import { DEG_180, DEG_90, randomElement, randomFloat, randomInt } from "./helpers";
 import { March, Attack, Damaging, Bleeding, Enraged, Summon, Invulnerable, DespawnTimer } from "./behaviours";
 import { Damage, Die } from "./actions";
 
@@ -23,6 +23,7 @@ export function Player() {
   player.collisionMask = LIVING;
   player.updateSpeed = 1000;
   player.hp = player.maxHp = 5;
+  player.emitter = fx.resurrect(player);
   player.onCollision = unit => {
     Damage(player, unit.hp);
     Die(unit);
@@ -94,8 +95,8 @@ export function Skeleton() {
 export function SkeletonLord() {
   let unit = Skeleton();
   unit.sprite = sprites.big_skeleton;
-  unit.hp = unit.maxHp = 5;
-  unit.updateSpeed = 3000;
+  unit.hp = unit.maxHp = 3;
+  unit.updateSpeed = 1500;
   return unit;
 }
 
@@ -165,6 +166,13 @@ export function TheKing() {
       unit.sprite = sprites.the_king_on_foot;
       unit.updateSpeed = unit.updateClock = 1000;
       marching.step /= 2;
+      let t = 0;
+      unit.addBehaviour().onFrame = dt => {
+        if ((t += dt) > 100) {
+          t = 0;
+          game.spawn(Corpse(), randomInt(game.stage.width), game.stage.ceiling);
+        }
+      };
     }
   };
 
@@ -351,7 +359,7 @@ export function RoyalGuardOrb() {
 export function Wizard() {
   let unit = Villager();
   unit.sprite = sprites.wizard;
-  unit.hp = unit.maxHp = 5;
+  unit.hp = unit.maxHp = 15;
   unit.souls = 30;
   unit.addBehaviour(new Summon(unit, Portal, 3000));
   return unit;

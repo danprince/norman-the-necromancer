@@ -263,7 +263,7 @@ export class Game {
     shotsPerRound: 1,
     shotOffsetAngle: 0.1,
     maxCasts: 3,
-    casts: 0,
+    casts: 3,
     castRechargeRate: 1000,
     castRechargeTimer: 0,
   };
@@ -330,15 +330,19 @@ export class Game {
   }
 
   update(dt: number) {
+    this.updateAbility(dt);
     this.updateSpell(dt);
     this.updateObjects(dt);
     this.updatePhysics(dt);
     this.updateRituals(dt);
   }
 
-  private updateSpell(dt: number) {
+  private updateAbility(dt: number) {
     game.ability.timer += dt;
+    game.player.emitter!.frequency = game.ability.timer >= game.ability.cooldown ? 0.1 : 0;
+  }
 
+  private updateSpell(dt: number) {
     if (this.spell.casts < this.spell.maxCasts) {
       this.spell.castRechargeTimer += dt;
       if (this.spell.castRechargeTimer > this.spell.castRechargeRate) {
