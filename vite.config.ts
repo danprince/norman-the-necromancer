@@ -2,6 +2,7 @@ import { defineConfig, Plugin } from "vite";
 
 export default defineConfig({
   plugins: [singleFile()],
+  base: "./",
   build: {
     polyfillModulePreload: false,
     reportCompressedSize: false,
