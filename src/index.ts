@@ -110,9 +110,7 @@ function updateDialogue(dt: number) {
   }
 }
 
-dust().burst(200);
 game.addRitual(Streak);
-game.addRitual(Freeze);
 
 shop.rituals = [
   Ceiling,
@@ -138,3 +136,4 @@ shop.rituals = [
 game.dialogue = INTRO_DIALOGUE;
 
 init(game.stage.width, game.stage.height, update);
+dust().burst(200);
