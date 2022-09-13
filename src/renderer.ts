@@ -88,6 +88,8 @@ function drawHud() {
     write(`${ICON_SOULS}${souls} ${bonus}`, canvas.width / 2 - 30, 0);
   }
 
+  write(`${game.level+1}-10`, canvas.width - 30, 2);
+
   if (game.state === PLAYING) {
     let x = 150;
     let y = canvas.height - 12;
