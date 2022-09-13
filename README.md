@@ -323,13 +323,14 @@ What would this game need if I want to publish it tomorrow?
 
 - [x] Ritual which turns corpses into souls at the end of each level
 - [x] Ritual which makes the shop cheaper
-- [ ] Knockback shouldn't work on the king
+- [x] Knockback shouldn't work on the king
 
 
 ## Final Day
-- [ ] Test the NG cycle
-- [ ] Make the shell wave less boring
-- [ ] Add the wizard to other waves
-- [ ] Review ritual names / necronomicon
-- [ ] Get game within budget
+- [x] Make the shell wave less boring
+- [x] Add the wizard to other waves
+- [x] Review ritual names / necronomicon
+- [x] Get game within budget
+- [x] Bug between chilly + unchained
+- [x] King shouldn't be freezable
 - [ ] Submit
