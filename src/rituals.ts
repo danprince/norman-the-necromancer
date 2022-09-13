@@ -4,48 +4,11 @@ import { Damage } from "./actions";
 import { Bleeding, Damaging, DespawnTimer, Frozen, HitStreak, LightningStrike, Seeking } from "./behaviours";
 import { tween } from "./engine";
 import { Behaviour, GameObject, RARE, Ritual } from "./game";
-import { angleBetweenPoints, clamp, DEG_180, DEG_360, DEG_90, distance, randomFloat, randomInt, vectorFromAngle } from "./helpers";
+import { DEG_180, DEG_360, distance, randomFloat, randomInt } from "./helpers";
 import { SkeletonLord, Spell } from "./objects";
 import { screenshake } from "./renderer";
 import { CORPSE, LIVING, UNDEAD } from "./tags";
 import { shop } from "./shop";
-
-/*
-- Every nth shot
-- Power shot
-- Casting Modifiers
-  - Increased casting capacity
-  - Increased casting charge speed
-  - One cast creates 3 spells
-- Spell Modifiers
-  - Drunk: Random aim but 2x damage
-  - Straight: Spells do not drop
-  - Homing: Spells seek enemies
-  - Knockback: Enemies are knocked back and stunned
-  - Piercing: Spells pass through enemies
-  - Explosive: Spells explode on impact
-    - Craters: Explosion size determined by downward velocity
-  - Bouncy: Spells bounce on surfaces
-    - Spells split on bounce
-- Corpses
-  - % chance on projectile bounce
-  - % chance on kill
-  - % chance on direct hit
-- Game changers
-  - Corridor: Ceiling
-  - Forsaken: 1hp, 3x damage
-- Sustain
-  - One-off increase to max HP
-  - Small chance to regain HP on kill
-- Curses
-  - Stun: Inactive for 3 seconds
-  - Bleed: Lose 1hp every 3 turns
-  - Doom: Guaranteed to leave a corpse
-- Wardstones
-- Souls
-- Resurrections:
-  - 10% chance to create skeleton lord
-*/
 
 // Ritual tags
 const NONE = 0;
@@ -242,19 +205,6 @@ export let Drunkard: Ritual = {
     spell.vy += randomInt(100) - 50;
     spell.getBehaviour(Damaging)!.amount *= 2;
   },
-};
-
-export let Pact: Ritual = {
-  tags: NONE,
-  name: "Pact",
-  description: "Resurrections heal undead allies",
-  onResurrect() {
-    for (let object of game.objects) {
-      if (object.is(UNDEAD)) {
-        Damage(object, object.hp - object.maxHp);
-      }
-    }
-  }
 };
 
 export let Seance: Ritual = {
