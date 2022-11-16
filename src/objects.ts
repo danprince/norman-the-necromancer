@@ -27,10 +27,8 @@ export function Player() {
   player.onCollision = unit => {
     Damage(player, unit.hp);
     Die(unit);
-    if (player.hp <= 0) {
-      window.location = window.location;
-    }
   };
+  player.onDeath = () => window.location = window.location;
   return player;
 }
 

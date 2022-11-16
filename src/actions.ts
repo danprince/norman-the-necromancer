@@ -32,8 +32,6 @@ export function Die(object: GameObject, killer?: GameObject) {
       .burst(2 + randomInt(3))
       .remove();
 
-    object.onDeath(death);
-
     for (let ritual of game.rituals) {
       ritual.onDeath?.(death);
     }
@@ -44,6 +42,8 @@ export function Die(object: GameObject, killer?: GameObject) {
 
     game.addSouls(death.souls);
   }
+
+  object.onDeath(death);
 
   game.despawn(object);
 }
