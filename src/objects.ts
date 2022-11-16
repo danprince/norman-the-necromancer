@@ -20,7 +20,7 @@ export function Player() {
   player.x = 5;
   player.tags = PLAYER | UNDEAD;
   player.sprite = sprites.norman_arms_down;
-  player.collisionMask = LIVING;
+  player.collisionMask = LIVING | SPELL;
   player.updateSpeed = 1000;
   player.hp = player.maxHp = 5;
   player.emitter = fx.resurrect(player);
