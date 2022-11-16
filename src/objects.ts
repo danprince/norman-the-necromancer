@@ -20,17 +20,15 @@ export function Player() {
   player.x = 5;
   player.tags = PLAYER | UNDEAD;
   player.sprite = sprites.norman_arms_down;
-  player.collisionMask = LIVING | SPELL;
+  player.collisionMask = LIVING;
   player.updateSpeed = 1000;
   player.hp = player.maxHp = 5;
   player.emitter = fx.resurrect(player);
   player.onCollision = unit => {
     Damage(player, unit.hp);
     Die(unit);
-    if (player.hp <= 0) {
-      window.location = window.location;
-    }
   };
+  player.onDeath = () => window.location = window.location;
   return player;
 }
 

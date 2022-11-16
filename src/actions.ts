@@ -3,7 +3,7 @@ import * as fx from "./fx";
 import { Damage, Death, GameObject } from "./game";
 import { clamp, randomFloat, randomInt, vectorFromAngle } from "./helpers";
 import { Corpse, Spell, Skeleton } from "./objects";
-import { CORPSE, MOBILE } from "./tags";
+import { CORPSE, MOBILE, PLAYER } from "./tags";
 
 export function Damage(
   object: GameObject,
@@ -44,6 +44,8 @@ export function Die(object: GameObject, killer?: GameObject) {
 
     game.addSouls(death.souls);
   }
+
+  if (object.is(PLAYER)) object.onDeath(death);
 
   game.despawn(object);
 }
