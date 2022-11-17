@@ -306,7 +306,7 @@ export let Avarice: Ritual = {
 export let Hardened: Ritual = {
   tags: NONE,
   name: "Hardened",
-  description: "Unead have +1 HP*",
+  description: "Undead have +1 HP*",
   onResurrection(object) {
     object.hp = object.maxHp += 1;
   }
